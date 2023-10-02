@@ -33,16 +33,16 @@ contract Liquidator is Owned(msg.sender), IUniswapV3SwapCallback {
             PoolAddress.computeAddress(uniswapV3Factory, PoolAddress.getPoolKey(collateral, debt, uniswapFee));
         uint256 collateralBalance = ERC20(collateral).balanceOf(address(this));
 
-        // collateral in, debt out
+        // collateral in, debt out. Sorted by address. Ouput token is always the debt
         bool zeroForOne = collateral < debt;
 
         IUniswapV3PoolActions(uniswapPool).swap(
             address(this),
             zeroForOne,
             // debtToCover is the amount of outputs we need so we do exact output
-            -int256(debtToCover),
+            -int256(debtToCover),   // negative number means, receive amount. Positive number means pay amount
             // price is irrelevant
-            zeroForOne ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1,
+            zeroForOne ? MIN_SQRT_RATIO + 1 : MAX_SQRT_RATIO - 1,   // Swap infinitely since we don't care for price
             abi.encode(collateral, debt, uniswapFee, liquidationArg1, liquidationArg2)
         );
 

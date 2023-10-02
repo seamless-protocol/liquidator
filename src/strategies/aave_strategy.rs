@@ -158,10 +158,10 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for AaveStrategy<M> {
     async fn sync_state(&mut self) -> Result<()> {
         info!("syncing state");
 
-        self.update_token_configs().await?;
-        self.approve_tokens().await?;
-        self.load_cache()?;
-        self.update_state().await?;
+        self.update_token_configs().await.unwrap();
+        self.approve_tokens().await.unwrap();
+        self.load_cache().unwrap();
+        self.update_state().await.unwrap();
 
         info!("done syncing state");
         Ok(())
@@ -313,6 +313,11 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                 }
             });
 
+        info!(
+            "Got borrow logs from {} to {}",
+            self.last_block_number, latest_block
+        );
+
         self.get_supply_logs(self.last_block_number.into(), latest_block)
             .await?
             .into_iter()
@@ -335,7 +340,16 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                 }
             });
 
+        info!(
+            "Got supply logs from {} to {}",
+            self.last_block_number, latest_block
+        );
+
         // write state cache to file
+        info!(
+            "Write state cache to file {}",
+            STATE_CACHE_FILE
+        );
         let cache = StateCache {
             last_block_number: latest_block.as_u64(),
             borrowers: self.borrowers.clone(),

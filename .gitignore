@@ -5,3 +5,5 @@ out/
 borrowers.json
 a
 a.json
+
+.env
