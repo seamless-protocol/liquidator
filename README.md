@@ -35,10 +35,7 @@ cargo install cross --git https://github.com/cross-rs/cross
 DOCKER_DEFAULT_PLATFORM=linux/amd64 cross build --target x86_64-unknown-linux-gnu --release
 ```
 
-d. Copy binary to liquidator host
-`scp ./target/x86_64-unknown-linux-gnu/release/aave-v3-liquidator liquidator:/home/0xforestwalker/repos/artemis-aave-v3-liquidator/aave-v3-liquidator`
+d. Copy (scp) binary to liquidator host
 
 6. Run liquidator
 `./target/release/aave-v3-liquidator --rpc <xyz> --private-key <xyz> --bid-percentage 100 --deployent seashell --liquidator-address <xyz>`
-
-STIG Liquidator addres: `0xB2e66FeEe21DEB1e179a446BAb0B311412E592Db`
