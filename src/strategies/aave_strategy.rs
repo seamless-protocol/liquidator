@@ -158,10 +158,10 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for AaveStrategy<M> {
     async fn sync_state(&mut self) -> Result<()> {
         info!("syncing state");
 
-        self.update_token_configs().await.unwrap();
-        self.approve_tokens().await.unwrap();
-        self.load_cache().unwrap();
-        self.update_state().await.unwrap();
+        self.update_token_configs().await?;
+        self.approve_tokens().await?;
+        self.load_cache()?;
+        self.update_state().await?;
 
         info!("done syncing state");
         Ok(())
