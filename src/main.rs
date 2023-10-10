@@ -105,10 +105,13 @@ async fn main() -> Result<()> {
 
     engine.add_executor(Box::new(executor));
     // Start engine.
-    if let Ok(mut set) = engine.run().await {
-        while let Some(res) = set.join_next().await {
-            info!("res: {:?}", res);
+    match engine.run().await {
+        Ok(mut set) => {
+            while let Some(res) = set.join_next().await {
+                info!("res: {:?}", res);
+            }
         }
+        Err(e) => panic!("Error starting liquidator {}", e)
     }
     Ok(())
 }

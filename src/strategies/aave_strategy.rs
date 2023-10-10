@@ -313,6 +313,11 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                 }
             });
 
+        info!(
+            "Got borrow logs from {} to {}",
+            self.last_block_number, latest_block
+        );
+
         self.get_supply_logs(self.last_block_number.into(), latest_block)
             .await?
             .into_iter()
@@ -335,7 +340,16 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                 }
             });
 
+        info!(
+            "Got supply logs from {} to {}",
+            self.last_block_number, latest_block
+        );
+
         // write state cache to file
+        info!(
+            "Write state cache to file {}",
+            STATE_CACHE_FILE
+        );
         let cache = StateCache {
             last_block_number: latest_block.as_u64(),
             borrowers: self.borrowers.clone(),
