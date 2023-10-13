@@ -51,7 +51,12 @@ contract LiquidatorTest is Test {
         oracle.setAssetPrice(address(cbeth), 1700 ether);
         oracle.setEthUsdPrice(1700 ether);
         vm.startPrank(aaveAdmin);
-        addAaveMarket(cbeth);
+
+        (address aToken,,) = dataProvider.getReserveTokensAddresses(address(cbeth));
+        if (aToken == address(0)) {
+            addAaveMarket(cbeth);
+        }
+
         addressesProvider.setPriceOracle(address(oracle));
         vm.stopPrank();
     }
