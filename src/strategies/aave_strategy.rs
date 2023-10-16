@@ -679,7 +679,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         op: &LiquidationOpportunity,
     ) -> Result<ContractCall<M, I256>> {
         info!(
-            "Build - borrower: {:?}, collateral: {:?}, debt: {:?}, debt_to_cover: {:?}, profit_eth",
+            "Build - borrower: {:?}, collateral: {:?}, debt: {:?}, debt_to_cover: {:?}, profit_eth: {:?}",
             op.borrower, op.collateral, op.debt, op.debt_to_cover, op.profit_eth
         );
 
