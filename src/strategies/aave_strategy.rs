@@ -14,9 +14,12 @@ use bindings_aave::{
 use bindings_liquidator::liquidator::Liquidator;
 use clap::{Parser, ValueEnum};
 use ethers::{
+    abi::{encode_packed, Token},
     contract::builders::ContractCall,
     providers::Middleware,
-    types::{transaction::eip2718::TypedTransaction, Address, ValueOrArray, H160, I256, U256, U64},
+    types::{
+        transaction::eip2718::TypedTransaction, Address, Bytes, ValueOrArray, H160, I256, U256, U64,
+    },
 };
 use ethers_contract::Multicall;
 use serde::{Deserialize, Serialize};
@@ -26,7 +29,7 @@ use std::io::Write;
 use std::iter::zip;
 use std::str::FromStr;
 use std::sync::Arc;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 use super::types::{Action, Event};
 
@@ -46,13 +49,14 @@ pub enum Deployment {
 }
 
 pub const WETH_ADDRESS: &str = "0x4200000000000000000000000000000000000006";
+pub const MULTICALL3_ADDRESS: &str = "0xcA11bde05977b3631167028862bE2a173976CA11";
 
 pub const LIQUIDATION_CLOSE_FACTOR_THRESHOLD: &str = "950000000000000000";
 pub const MAX_LIQUIDATION_CLOSE_FACTOR: u64 = 10000;
 pub const DEFAULT_LIQUIDATION_CLOSE_FACTOR: u64 = 5000;
 
 // admin stuff
-pub const LOG_BLOCK_RANGE: u64 = 1024;
+pub const LOG_BLOCK_RANGE: u64 = 1000;
 pub const MULTICALL_CHUNK_SIZE: usize = 100;
 pub const STATE_CACHE_FILE: &str = "borrowers.json";
 pub const PRICE_ONE: u64 = 100000000;
@@ -230,9 +234,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         // call pool.getUserAccountData(user) for each borrower
         let mut multicall = Multicall::new(
             self.client.clone(),
-            Some(H160::from_str(
-                "0xcA11bde05977b3631167028862bE2a173976CA11",
-            )?),
+            Some(H160::from_str(MULTICALL3_ADDRESS)?),
         )
         .await?;
         let borrowers: Vec<&Borrower> = self
@@ -346,10 +348,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         );
 
         // write state cache to file
-        info!(
-            "Write state cache to file {}",
-            STATE_CACHE_FILE
-        );
+        info!("Write state cache to file {}", STATE_CACHE_FILE);
         let cache = StateCache {
             last_block_number: latest_block.as_u64(),
             borrowers: self.borrowers.clone(),
@@ -514,22 +513,34 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         let pool_state = self.get_pool_state().await?;
 
         for (borrower, health_factor) in underwater {
-            if let Some(op) = self
-                .get_liquidation_opportunity(
-                    self.borrowers
-                        .get(&borrower)
-                        .ok_or(anyhow!("Borrower not found"))?,
-                    &pool_data,
-                    &health_factor,
-                    &pool_state,
-                )
-                .await
-                .map_err(|e| info!("Liquidation op failed {}", e))
-                .ok()
-            {
-                if op.profit_eth > best_bonus {
-                    best_bonus = op.profit_eth;
-                    best_op = Some(op);
+            let borrower_details = self
+                .borrowers
+                .get(&borrower)
+                .ok_or(anyhow!("Borrower not found"))?;
+
+            for collateral_address in &borrower_details.collateral {
+                for debt_address in &borrower_details.debt {
+                    // TODO: handle case where collateral and debt are same asset
+                    if collateral_address.ne(debt_address) {
+                        if let Some(op) = self
+                            .get_liquidation_opportunity(
+                                &borrower,
+                                collateral_address,
+                                debt_address,
+                                &pool_data,
+                                &health_factor,
+                                &pool_state,
+                            )
+                            .await
+                            .map_err(|e| info!("Liquidation op failed {}", e))
+                            .ok()
+                        {
+                            if op.profit_eth > best_bonus {
+                                best_bonus = op.profit_eth;
+                                best_op = Some(op);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -537,12 +548,39 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         Ok(best_op)
     }
 
+    // Assumes there are WETH pairs for both collateral and debt asset types and that all pools have 500 fee
+    // TODO: handle arbitrary pool fees and path
+    fn get_swap_path(&self, collateral: &Address, debt: &Address) -> Result<Bytes> {
+        let weth_address = WETH_ADDRESS.parse::<Address>()?;
+
+        let pool_fee: u32 = 500;
+        let pool_fee_encoded = pool_fee.to_be_bytes()[1..].to_vec(); // convert to uint24 by taking last 3 bytes only
+        let mut path: Vec<Token> = Vec::new();
+
+        // We first want to swap for debt
+        path.push(Token::Address(*debt));
+        path.push(Token::FixedBytes(pool_fee_encoded.clone()));
+
+        // If neither the collateral or debt is WETH then we want to introduce an intermediate swap through WETH
+        if collateral.ne(&weth_address) && debt.ne(&weth_address) {
+            path.push(Token::Address(weth_address));
+            path.push(Token::FixedBytes(pool_fee_encoded.clone()));
+        }
+
+        // Finally we want to use obtained collateral to pay the flash swap back
+        path.push(Token::Address(*collateral));
+
+        debug!("get_swap_path {:?}", path);
+
+        let encoded_swap_path = encode_packed(&path)?;
+
+        Ok(Bytes::from(encoded_swap_path))
+    }
+
     async fn get_pool_state(&self) -> Result<PoolState> {
         let mut multicall = Multicall::<M>::new(
             self.client.clone(),
-            Some(H160::from_str(
-                "0xcA11bde05977b3631167028862bE2a173976CA11",
-            )?),
+            Some(H160::from_str(MULTICALL3_ADDRESS)?),
         )
         .await?;
         let mut prices = HashMap::new();
@@ -563,23 +601,13 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
     async fn get_liquidation_opportunity(
         &self,
-        borrower: &Borrower,
+        borrower_address: &Address,
+        collateral_address: &Address,
+        debt_address: &Address,
         pool_data: &IPoolDataProvider<M>,
         health_factor: &U256,
         pool_state: &PoolState,
     ) -> Result<LiquidationOpportunity> {
-        let Borrower {
-            address: borrower_address,
-            collateral,
-            debt,
-        } = borrower;
-        // TODO: handle users with multiple collateral / debt
-        // get first item out of the set
-        let collateral_address = collateral
-            .iter()
-            .next()
-            .ok_or(anyhow!("No collateral found"))?;
-        let debt_address = debt.iter().next().ok_or(anyhow!("No debt found"))?;
         let collateral_asset_price = pool_state
             .prices
             .get(collateral_address)
@@ -639,8 +667,8 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         op.profit_eth = gain * I256::from_dec_str(&weth_price.to_string())? / I256::from(PRICE_ONE);
 
         info!(
-            "Found opportunity - collateral: {:?}, debt: {:?}, collateral_to_liquidate: {:?}, debt_to_cover: {:?}, profit_eth: {:?}",
-            collateral_address, debt_address, collateral_to_liquidate, debt_to_cover, op.profit_eth
+            "Found opportunity - borrower: {:?}, collateral: {:?}, debt: {:?}, profit_eth: {:?}",
+            borrower_address, collateral_address, debt_address, op.profit_eth
         );
 
         Ok(op)
@@ -650,6 +678,11 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         &self,
         op: &LiquidationOpportunity,
     ) -> Result<ContractCall<M, I256>> {
+        info!(
+            "Build - borrower: {:?}, collateral: {:?}, debt: {:?}, debt_to_cover: {:?}, profit_eth: {:?}",
+            op.borrower, op.collateral, op.debt, op.debt_to_cover, op.profit_eth
+        );
+
         let liquidator = Liquidator::new(self.liquidator, self.client.clone());
         let encoder = L2Encoder::new(self.config.l2_encoder, self.client.clone());
         let (data0, data1) = encoder
@@ -657,8 +690,19 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             .call()
             .await?;
 
-        // TODO: handle arbitrary pool fees
-        Ok(liquidator.liquidate(op.collateral, op.debt, 500, op.debt_to_cover, data0, data1))
+        let swap_path = self.get_swap_path(&op.collateral, &op.debt)?;
+
+        let contract_call = liquidator.liquidate(
+            op.collateral,
+            op.debt_to_cover,
+            data0,
+            data1,
+            Bytes::from(swap_path),
+        );
+
+        debug!("Liquidation op contract call: {:?}", contract_call);
+
+        Ok(contract_call)
     }
 
     async fn build_liquidation(&self, op: &LiquidationOpportunity) -> Result<TypedTransaction> {

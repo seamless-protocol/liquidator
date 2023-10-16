@@ -7,3 +7,5 @@ a
 a.json
 
 .env
+
+.DS_store

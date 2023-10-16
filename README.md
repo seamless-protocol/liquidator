@@ -13,7 +13,7 @@ This is an [Artemis](https://github.com/paradigmxyz/artemis) bot that liquidates
 ```bash
 cd crates/liquidator-contract
 forge install
-forge create ./src/Liquidator.sol/Liquidator --private-key <xyz> --rpc-url <xyz>
+forge create ./src/Liquidator.sol:Liquidator --private-key <xyz> --rpc-url <xyz>
 ```
 
 4. Build Rust Application
@@ -39,3 +39,16 @@ d. Copy (scp) binary to liquidator host
 
 6. Run liquidator
 `./target/release/aave-v3-liquidator --rpc <xyz> --private-key <xyz> --bid-percentage 100 --deployent seashell --liquidator-address <xyz>`
+
+
+# Re-generate Contract Bindings
+
+## Liquidator
+```bash
+forge bind --bindings-path ./crates/bindings-liquidator --root ./crates/liquidator-contract --crate-name bindings-liquidator --overwrite
+```
+
+## Aave
+```bash
+forge bind --bindings-path ./crates/bindings-aave --root {path to aave-v3-core} --crate-name bindings-aave --overwrite
+```

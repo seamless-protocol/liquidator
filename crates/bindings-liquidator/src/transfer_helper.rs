@@ -1,4 +1,4 @@
-pub use std_style::*;
+pub use transfer_helper::*;
 /// This module was auto-generated with ethers-rs Abigen.
 /// More information at: <https://github.com/gakonst/ethers-rs>
 #[allow(
@@ -9,7 +9,7 @@ pub use std_style::*;
     dead_code,
     non_camel_case_types,
 )]
-pub mod std_style {
+pub mod transfer_helper {
     #[allow(deprecated)]
     fn __abi() -> ::ethers::core::abi::Abi {
         ::ethers::core::abi::ethabi::Contract {
@@ -22,44 +22,46 @@ pub mod std_style {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static STDSTYLE_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(
+    pub static TRANSFERHELPER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(
         __abi,
     );
     #[rustfmt::skip]
-    const __BYTECODE: &[u8] = b"`V`7`\x0B\x82\x82\x829\x80Q`\0\x1A`s\x14`*WcNH{q`\xE0\x1B`\0R`\0`\x04R`$`\0\xFD[0`\0R`s\x81S\x82\x81\xF3\xFEs\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x000\x14`\x80`@R`\0\x80\xFD\xFE\xA2dipfsX\"\x12 \rJ\x84\xE2j-E\xF3\xD4[\xF8g\x8A\xB3\xCF*\x16@S\xA3+\xA2\x97\xD8\x91\xBC\xE4\x8Alo\xBCYdsolcC\0\x08\x12\x003";
+    const __BYTECODE: &[u8] = b"`V`7`\x0B\x82\x82\x829\x80Q`\0\x1A`s\x14`*WcNH{q`\xE0\x1B`\0R`\0`\x04R`$`\0\xFD[0`\0R`s\x81S\x82\x81\xF3\xFEs\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x000\x14`\x80`@R`\0\x80\xFD\xFE\xA2dipfsX\"\x12 \x16\x93\xCA\x10\x89\xCE\xB8\xE8{v%\xE9\xF5aj\xC2\xB3N\r\x0F\xDB\xB1qII\xF6'\xFF\xB3\xE9Q\xBDdsolcC\0\x08\x12\x003";
     /// The bytecode of the contract.
-    pub static STDSTYLE_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
+    pub static TRANSFERHELPER_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
         __BYTECODE,
     );
     #[rustfmt::skip]
-    const __DEPLOYED_BYTECODE: &[u8] = b"s\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x000\x14`\x80`@R`\0\x80\xFD\xFE\xA2dipfsX\"\x12 \rJ\x84\xE2j-E\xF3\xD4[\xF8g\x8A\xB3\xCF*\x16@S\xA3+\xA2\x97\xD8\x91\xBC\xE4\x8Alo\xBCYdsolcC\0\x08\x12\x003";
+    const __DEPLOYED_BYTECODE: &[u8] = b"s\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x000\x14`\x80`@R`\0\x80\xFD\xFE\xA2dipfsX\"\x12 \x16\x93\xCA\x10\x89\xCE\xB8\xE8{v%\xE9\xF5aj\xC2\xB3N\r\x0F\xDB\xB1qII\xF6'\xFF\xB3\xE9Q\xBDdsolcC\0\x08\x12\x003";
     /// The deployed bytecode of the contract.
-    pub static STDSTYLE_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
+    pub static TRANSFERHELPER_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
         __DEPLOYED_BYTECODE,
     );
-    pub struct StdStyle<M>(::ethers::contract::Contract<M>);
-    impl<M> ::core::clone::Clone for StdStyle<M> {
+    pub struct TransferHelper<M>(::ethers::contract::Contract<M>);
+    impl<M> ::core::clone::Clone for TransferHelper<M> {
         fn clone(&self) -> Self {
             Self(::core::clone::Clone::clone(&self.0))
         }
     }
-    impl<M> ::core::ops::Deref for StdStyle<M> {
+    impl<M> ::core::ops::Deref for TransferHelper<M> {
         type Target = ::ethers::contract::Contract<M>;
         fn deref(&self) -> &Self::Target {
             &self.0
         }
     }
-    impl<M> ::core::ops::DerefMut for StdStyle<M> {
+    impl<M> ::core::ops::DerefMut for TransferHelper<M> {
         fn deref_mut(&mut self) -> &mut Self::Target {
             &mut self.0
         }
     }
-    impl<M> ::core::fmt::Debug for StdStyle<M> {
+    impl<M> ::core::fmt::Debug for TransferHelper<M> {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_tuple(::core::stringify!(StdStyle)).field(&self.address()).finish()
+            f.debug_tuple(::core::stringify!(TransferHelper))
+                .field(&self.address())
+                .finish()
         }
     }
-    impl<M: ::ethers::providers::Middleware> StdStyle<M> {
+    impl<M: ::ethers::providers::Middleware> TransferHelper<M> {
         /// Creates a new contract instance with the specified `ethers` client at
         /// `address`. The contract derefs to a `ethers::Contract` object.
         pub fn new<T: Into<::ethers::core::types::Address>>(
@@ -69,7 +71,7 @@ pub mod std_style {
             Self(
                 ::ethers::contract::Contract::new(
                     address.into(),
-                    STDSTYLE_ABI.clone(),
+                    TRANSFERHELPER_ABI.clone(),
                     client,
                 ),
             )
@@ -105,8 +107,8 @@ pub mod std_style {
             ::ethers::contract::ContractError<M>,
         > {
             let factory = ::ethers::contract::ContractFactory::new(
-                STDSTYLE_ABI.clone(),
-                STDSTYLE_BYTECODE.clone().into(),
+                TRANSFERHELPER_ABI.clone(),
+                TRANSFERHELPER_BYTECODE.clone().into(),
                 client,
             );
             let deployer = factory.deploy(constructor_args)?;
@@ -115,7 +117,7 @@ pub mod std_style {
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for StdStyle<M> {
+    for TransferHelper<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
