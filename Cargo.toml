@@ -1,5 +1,5 @@
 [package]
-name = "aave-v3-liquidator"
+name = "seamless-liquidator"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 bindings-aave = { path = "./crates/bindings-aave" }
 bindings-liquidator = { path = "./crates/bindings-liquidator" }
+paraswap-api = { path = "./crates/paraswap-api" }
 
 artemis-core = { git = "https://github.com/paradigmxyz/artemis"}
 ethers = { version = "2", features = ["ws", "rustls"]}

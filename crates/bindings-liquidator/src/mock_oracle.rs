@@ -186,13 +186,13 @@ pub mod mock_oracle {
         __abi,
     );
     #[rustfmt::skip]
-    const __BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[Pa\x02\n\x80a\0 `\09`\0\xF3\xFE`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\0LW`\x005`\xE0\x1C\x80cQ2?r\x14a\0QW\x80c\xA0\xA8\x04^\x14a\0fW\x80c\xB3Yo\x07\x14a\0|W\x80c\xB9Q\x88:\x14a\0\xA5W[`\0\x80\xFD[a\0da\0_6`\x04a\x01oV[a\0\xB8V[\0[`\x01T[`@Q\x90\x81R` \x01`@Q\x80\x91\x03\x90\xF3[a\0ja\0\x8A6`\x04a\x01\x99V[`\x01`\x01`\xA0\x1B\x03\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x90V[a\0da\0\xB36`\x04a\x01\xBBV[a\x01\x13V[`\x01`\x01`\xA0\x1B\x03\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x84\x90U\x81Q\x92\x83R\x82\x01\x83\x90RB\x82\x82\x01RQ\x7F\xCEn\x0BW6{\xAE\x95\xCAq\x98\xE1\x17/e>\xA6Jd\\\x16\xABXkL\xEF\xA9#{\xFC-\x92\x91\x81\x90\x03``\x01\x90\xA1PPV[`\x01\x81\x90U`@\x80Q\x82\x81RB` \x82\x01R\x7F\xB4\xF3Yw\x93\x9F\xA8\xB5\xFF\xE5R\xD5\x17\xA8\xFFR#\x04k\x1F\xDD>\xE0\x06\x8A\xE3\x8D\x1E+\x8D\0\x16\x91\x01`@Q\x80\x91\x03\x90\xA1PV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x01jW`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01\x82W`\0\x80\xFD[a\x01\x8B\x83a\x01SV[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xABW`\0\x80\xFD[a\x01\xB4\x82a\x01SV[\x93\x92PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xCDW`\0\x80\xFD[P5\x91\x90PV\xFE\xA2dipfsX\"\x12 \x95\xF3\xF8\x90\xAA<=\x9E\xC4\xFA\x1C\xFDh\xAE\xD0\x8C\xA8\x89\x05\x0B\x84\n\x11\x8B/\xCF\xB5\xF1q\x8F\xF4\xA5dsolcC\0\x08\x12\x003";
+    const __BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[Pa\x02\n\x80a\0 `\09`\0\xF3\xFE`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\0LW`\x005`\xE0\x1C\x80cQ2?r\x14a\0QW\x80c\xA0\xA8\x04^\x14a\0fW\x80c\xB3Yo\x07\x14a\0|W\x80c\xB9Q\x88:\x14a\0\xA5W[`\0\x80\xFD[a\0da\0_6`\x04a\x01oV[a\0\xB8V[\0[`\x01T[`@Q\x90\x81R` \x01`@Q\x80\x91\x03\x90\xF3[a\0ja\0\x8A6`\x04a\x01\x99V[`\x01`\x01`\xA0\x1B\x03\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x90V[a\0da\0\xB36`\x04a\x01\xBBV[a\x01\x13V[`\x01`\x01`\xA0\x1B\x03\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x84\x90U\x81Q\x92\x83R\x82\x01\x83\x90RB\x82\x82\x01RQ\x7F\xCEn\x0BW6{\xAE\x95\xCAq\x98\xE1\x17/e>\xA6Jd\\\x16\xABXkL\xEF\xA9#{\xFC-\x92\x91\x81\x90\x03``\x01\x90\xA1PPV[`\x01\x81\x90U`@\x80Q\x82\x81RB` \x82\x01R\x7F\xB4\xF3Yw\x93\x9F\xA8\xB5\xFF\xE5R\xD5\x17\xA8\xFFR#\x04k\x1F\xDD>\xE0\x06\x8A\xE3\x8D\x1E+\x8D\0\x16\x91\x01`@Q\x80\x91\x03\x90\xA1PV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x01jW`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01\x82W`\0\x80\xFD[a\x01\x8B\x83a\x01SV[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xABW`\0\x80\xFD[a\x01\xB4\x82a\x01SV[\x93\x92PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xCDW`\0\x80\xFD[P5\x91\x90PV\xFE\xA2dipfsX\"\x12 {\x03j~\x83j\x94?\x80Ym-\x1Bs\x8A\xDC\x13\xA1\xE1\x96\xCF\xFF\xF0\x0E\xD6C\x88\xC8-c\x84\tdsolcC\0\x08\x14\x003";
     /// The bytecode of the contract.
     pub static MOCKORACLE_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
         __BYTECODE,
     );
     #[rustfmt::skip]
-    const __DEPLOYED_BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\0LW`\x005`\xE0\x1C\x80cQ2?r\x14a\0QW\x80c\xA0\xA8\x04^\x14a\0fW\x80c\xB3Yo\x07\x14a\0|W\x80c\xB9Q\x88:\x14a\0\xA5W[`\0\x80\xFD[a\0da\0_6`\x04a\x01oV[a\0\xB8V[\0[`\x01T[`@Q\x90\x81R` \x01`@Q\x80\x91\x03\x90\xF3[a\0ja\0\x8A6`\x04a\x01\x99V[`\x01`\x01`\xA0\x1B\x03\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x90V[a\0da\0\xB36`\x04a\x01\xBBV[a\x01\x13V[`\x01`\x01`\xA0\x1B\x03\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x84\x90U\x81Q\x92\x83R\x82\x01\x83\x90RB\x82\x82\x01RQ\x7F\xCEn\x0BW6{\xAE\x95\xCAq\x98\xE1\x17/e>\xA6Jd\\\x16\xABXkL\xEF\xA9#{\xFC-\x92\x91\x81\x90\x03``\x01\x90\xA1PPV[`\x01\x81\x90U`@\x80Q\x82\x81RB` \x82\x01R\x7F\xB4\xF3Yw\x93\x9F\xA8\xB5\xFF\xE5R\xD5\x17\xA8\xFFR#\x04k\x1F\xDD>\xE0\x06\x8A\xE3\x8D\x1E+\x8D\0\x16\x91\x01`@Q\x80\x91\x03\x90\xA1PV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x01jW`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01\x82W`\0\x80\xFD[a\x01\x8B\x83a\x01SV[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xABW`\0\x80\xFD[a\x01\xB4\x82a\x01SV[\x93\x92PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xCDW`\0\x80\xFD[P5\x91\x90PV\xFE\xA2dipfsX\"\x12 \x95\xF3\xF8\x90\xAA<=\x9E\xC4\xFA\x1C\xFDh\xAE\xD0\x8C\xA8\x89\x05\x0B\x84\n\x11\x8B/\xCF\xB5\xF1q\x8F\xF4\xA5dsolcC\0\x08\x12\x003";
+    const __DEPLOYED_BYTECODE: &[u8] = b"`\x80`@R4\x80\x15a\0\x10W`\0\x80\xFD[P`\x046\x10a\0LW`\x005`\xE0\x1C\x80cQ2?r\x14a\0QW\x80c\xA0\xA8\x04^\x14a\0fW\x80c\xB3Yo\x07\x14a\0|W\x80c\xB9Q\x88:\x14a\0\xA5W[`\0\x80\xFD[a\0da\0_6`\x04a\x01oV[a\0\xB8V[\0[`\x01T[`@Q\x90\x81R` \x01`@Q\x80\x91\x03\x90\xF3[a\0ja\0\x8A6`\x04a\x01\x99V[`\x01`\x01`\xA0\x1B\x03\x16`\0\x90\x81R` \x81\x90R`@\x90 T\x90V[a\0da\0\xB36`\x04a\x01\xBBV[a\x01\x13V[`\x01`\x01`\xA0\x1B\x03\x82\x16`\0\x81\x81R` \x81\x81R`@\x91\x82\x90 \x84\x90U\x81Q\x92\x83R\x82\x01\x83\x90RB\x82\x82\x01RQ\x7F\xCEn\x0BW6{\xAE\x95\xCAq\x98\xE1\x17/e>\xA6Jd\\\x16\xABXkL\xEF\xA9#{\xFC-\x92\x91\x81\x90\x03``\x01\x90\xA1PPV[`\x01\x81\x90U`@\x80Q\x82\x81RB` \x82\x01R\x7F\xB4\xF3Yw\x93\x9F\xA8\xB5\xFF\xE5R\xD5\x17\xA8\xFFR#\x04k\x1F\xDD>\xE0\x06\x8A\xE3\x8D\x1E+\x8D\0\x16\x91\x01`@Q\x80\x91\x03\x90\xA1PV[\x805`\x01`\x01`\xA0\x1B\x03\x81\x16\x81\x14a\x01jW`\0\x80\xFD[\x91\x90PV[`\0\x80`@\x83\x85\x03\x12\x15a\x01\x82W`\0\x80\xFD[a\x01\x8B\x83a\x01SV[\x94` \x93\x90\x93\x015\x93PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xABW`\0\x80\xFD[a\x01\xB4\x82a\x01SV[\x93\x92PPPV[`\0` \x82\x84\x03\x12\x15a\x01\xCDW`\0\x80\xFD[P5\x91\x90PV\xFE\xA2dipfsX\"\x12 {\x03j~\x83j\x94?\x80Ym-\x1Bs\x8A\xDC\x13\xA1\xE1\x96\xCF\xFF\xF0\x0E\xD6C\x88\xC8-c\x84\tdsolcC\0\x08\x14\x003";
     /// The deployed bytecode of the contract.
     pub static MOCKORACLE_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
         __DEPLOYED_BYTECODE,
@@ -350,6 +350,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -369,6 +371,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -381,7 +385,16 @@ pub mod mock_oracle {
         pub timestamp: ::ethers::core::types::U256,
     }
     ///Container type for all of the contract's events
-    #[derive(Clone, ::ethers::contract::EthAbiType, Debug, PartialEq, Eq, Hash)]
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        serde::Serialize,
+        serde::Deserialize,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
     pub enum MockOracleEvents {
         AssetPriceUpdatedFilter(AssetPriceUpdatedFilter),
         EthPriceUpdatedFilter(EthPriceUpdatedFilter),
@@ -426,6 +439,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -441,6 +456,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -454,6 +471,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -470,6 +489,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -481,7 +502,16 @@ pub mod mock_oracle {
         pub price: ::ethers::core::types::U256,
     }
     ///Container type for all of the contract's call
-    #[derive(Clone, ::ethers::contract::EthAbiType, Debug, PartialEq, Eq, Hash)]
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        serde::Serialize,
+        serde::Deserialize,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
     pub enum MockOracleCalls {
         GetAssetPrice(GetAssetPriceCall),
         GetEthUsdPrice(GetEthUsdPriceCall),
@@ -493,20 +523,24 @@ pub mod mock_oracle {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded)
-                = <GetAssetPriceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <GetAssetPriceCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::GetAssetPrice(decoded));
             }
-            if let Ok(decoded)
-                = <GetEthUsdPriceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <GetEthUsdPriceCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::GetEthUsdPrice(decoded));
             }
-            if let Ok(decoded)
-                = <SetAssetPriceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SetAssetPriceCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetAssetPrice(decoded));
             }
-            if let Ok(decoded)
-                = <SetEthUsdPriceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SetEthUsdPriceCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetEthUsdPrice(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -565,6 +599,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthAbiType,
         ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -577,6 +613,8 @@ pub mod mock_oracle {
         Clone,
         ::ethers::contract::EthAbiType,
         ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,

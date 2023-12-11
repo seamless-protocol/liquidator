@@ -1,4 +1,4 @@
-# Aave V3 Liquidator
+Seamless Liquidator
 
 This is an [Artemis](https://github.com/paradigmxyz/artemis) bot that liquidates aave v3 positions on base chain
 
@@ -7,13 +7,24 @@ This is an [Artemis](https://github.com/paradigmxyz/artemis) bot that liquidates
 1. Install Rust [ref](https://doc.rust-lang.org/book/ch01-01-installation.html)
     - Install deps: `sudo apt install -y build-essential libssl-dev` (Linux) or `xcode-select --install` (Mac)
 
-3. Install Foundry [ref](https://book.getfoundry.sh/getting-started/installation)
+2. Install Foundry [ref](https://book.getfoundry.sh/getting-started/installation)
 
 3. Deploy liquidator contract
+a. Create or update `.env` file
+b. Build and deploy liquidator contract
+- Default (Uniswap v3 Flash Swaps)
 ```bash
 cd crates/liquidator-contract
 forge install
-forge create ./src/Liquidator.sol:Liquidator --private-key <xyz> --rpc-url <xyz>
+make build
+make deploy-liquidator
+```
+- Paraswap (Flash loan from Seamless or other Aave v3 compatible flash loan source)
+```bash
+cd crates/liquidator-contract
+forge install
+make build
+make deploy-liquidator-paraswap
 ```
 
 4. Build Rust Application
@@ -38,7 +49,11 @@ DOCKER_DEFAULT_PLATFORM=linux/amd64 cross build --target x86_64-unknown-linux-gn
 d. Copy (scp) binary to liquidator host
 
 6. Run liquidator
-`./target/release/aave-v3-liquidator --rpc <xyz> --private-key <xyz> --bid-percentage 100 --deployent seashell --liquidator-address <xyz>`
+`make run-release`
+
+OR
+
+`make run-release-paraswap`
 
 
 # Re-generate Contract Bindings

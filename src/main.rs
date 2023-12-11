@@ -13,7 +13,7 @@ use ethers::{
 use executors::protect_executor::ProtectExecutor;
 use std::sync::Arc;
 use strategies::{
-    aave_strategy::{AaveStrategy, Deployment},
+    aave_strategy::{AaveStrategy, Deployment, DexAggregator},
     types::{Action, Config, Event},
 };
 use tracing::{info, Level};
@@ -46,6 +46,9 @@ pub struct Args {
 
     #[arg(long)]
     pub liquidator_address: String,
+
+    #[arg(long)]
+    pub dex_aggregator: DexAggregator,
 }
 
 #[tokio::main]
@@ -53,7 +56,8 @@ async fn main() -> Result<()> {
     // Set up tracing and parse args.
     let filter = filter::Targets::new()
         .with_target("artemis_core", Level::INFO)
-        .with_target("aave_v3_liquidator", Level::INFO);
+        .with_target("seamless_liquidator", Level::INFO)
+        .with_target("paraswap_api", Level::INFO);
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
@@ -94,6 +98,7 @@ async fn main() -> Result<()> {
         config,
         args.deployment,
         args.liquidator_address,
+        args.dex_aggregator,
     );
     engine.add_strategy(Box::new(strategy));
 

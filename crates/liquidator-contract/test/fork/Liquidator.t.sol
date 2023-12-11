@@ -2,13 +2,13 @@
 pragma solidity ^0.8.13;
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {Test, console2} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {MockOracle} from "../util/MockOracle.sol";
 import {Liquidator} from "../../src/Liquidator.sol";
 import {IL2Pool} from "../../src/interfaces/IL2Pool.sol";
 import {IL2Encoder} from "../../src/interfaces/IL2Encoder.sol";
 import {IAaveOracle} from "../../src/interfaces/IAaveOracle.sol";
-import {IPoolAddressesProvider} from "../../src/interfaces/IAddressesProvider.sol";
+import {IPoolAddressesProvider} from "../../src/interfaces/IPoolAddressesProvider.sol";
 import {IPoolDataProvider} from "../../src/interfaces/IPoolDataProvider.sol";
 import {IPoolConfigurator} from "../../src/interfaces/IPoolConfigurator.sol";
 import {ConfiguratorInputTypes} from "../../src/interfaces/ConfiguratorInputTypes.sol";
@@ -34,7 +34,7 @@ contract LiquidatorTest is Test {
     address user;
 
     function setUp() public {
-        vm.createSelectFork(vm.envString("FORK_URL"));
+        vm.createSelectFork(vm.envString("FORK_URL"), 4878098);
         oracle = new MockOracle();
         user = makeAddr("user");
         liquidator = new Liquidator();

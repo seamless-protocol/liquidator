@@ -2209,6 +2209,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2228,6 +2230,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2248,6 +2252,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2266,6 +2272,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2284,6 +2292,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2305,6 +2315,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2325,6 +2337,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2345,6 +2359,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2368,6 +2384,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2386,6 +2404,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2404,6 +2424,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2424,6 +2446,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2440,6 +2464,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2456,6 +2482,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2471,6 +2499,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2491,6 +2521,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2507,6 +2539,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2523,6 +2557,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2546,6 +2582,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2566,6 +2604,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2582,6 +2622,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2601,6 +2643,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2621,6 +2665,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2643,6 +2689,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2663,6 +2711,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2683,6 +2733,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthEvent,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -2702,7 +2754,16 @@ pub mod i_pool_configurator {
         pub implementation: ::ethers::core::types::Address,
     }
     ///Container type for all of the contract's events
-    #[derive(Clone, ::ethers::contract::EthAbiType, Debug, PartialEq, Eq, Hash)]
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        serde::Serialize,
+        serde::Deserialize,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
+    )]
     pub enum IPoolConfiguratorEvents {
         AtokenUpgradedFilter(AtokenUpgradedFilter),
         BorrowCapChangedFilter(BorrowCapChangedFilter),
@@ -2771,8 +2832,9 @@ pub mod i_pool_configurator {
             if let Ok(decoded) = EmodeCategoryAddedFilter::decode_log(log) {
                 return Ok(IPoolConfiguratorEvents::EmodeCategoryAddedFilter(decoded));
             }
-            if let Ok(decoded)
-                = FlashloanPremiumToProtocolUpdatedFilter::decode_log(log) {
+            if let Ok(decoded) = FlashloanPremiumToProtocolUpdatedFilter::decode_log(
+                log,
+            ) {
                 return Ok(
                     IPoolConfiguratorEvents::FlashloanPremiumToProtocolUpdatedFilter(
                         decoded,
@@ -2810,8 +2872,9 @@ pub mod i_pool_configurator {
             if let Ok(decoded) = ReserveInitializedFilter::decode_log(log) {
                 return Ok(IPoolConfiguratorEvents::ReserveInitializedFilter(decoded));
             }
-            if let Ok(decoded)
-                = ReserveInterestRateStrategyChangedFilter::decode_log(log) {
+            if let Ok(decoded) = ReserveInterestRateStrategyChangedFilter::decode_log(
+                log,
+            ) {
                 return Ok(
                     IPoolConfiguratorEvents::ReserveInterestRateStrategyChangedFilter(
                         decoded,
@@ -3084,6 +3147,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3105,6 +3170,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3116,7 +3183,13 @@ pub mod i_pool_configurator {
         pub asset: ::ethers::core::types::Address,
     }
     ///Container type for all input parameters for the `initReserves` function with signature `initReserves((address,address,address,uint8,address,address,address,address,string,string,string,string,string,string,bytes)[])` and selector `0x02fb45e6`
-    #[derive(Clone, ::ethers::contract::EthCall, ::ethers::contract::EthDisplay)]
+    #[derive(
+        Clone,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
+    )]
     #[ethcall(
         name = "initReserves",
         abi = "initReserves((address,address,address,uint8,address,address,address,address,string,string,string,string,string,string,bytes)[])"
@@ -3129,6 +3202,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3148,6 +3223,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3164,6 +3241,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3183,6 +3262,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3199,6 +3280,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3222,6 +3305,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3241,6 +3326,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3256,6 +3343,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3272,6 +3361,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3288,6 +3379,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3304,6 +3397,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3323,6 +3418,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3339,6 +3436,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3358,6 +3457,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3374,6 +3475,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3393,6 +3496,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3409,6 +3514,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3425,6 +3532,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3441,6 +3550,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3459,6 +3570,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3477,6 +3590,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3495,6 +3610,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3513,6 +3630,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3531,6 +3650,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -3545,7 +3666,12 @@ pub mod i_pool_configurator {
         pub input: UpdateDebtTokenInput,
     }
     ///Container type for all of the contract's call
-    #[derive(Clone, ::ethers::contract::EthAbiType)]
+    #[derive(
+        Clone,
+        ::ethers::contract::EthAbiType,
+        serde::Serialize,
+        serde::Deserialize,
+    )]
     pub enum IPoolConfiguratorCalls {
         ConfigureReserveAsCollateral(ConfigureReserveAsCollateralCall),
         DropReserve(DropReserveCall),
@@ -3580,150 +3706,139 @@ pub mod i_pool_configurator {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded)
-                = <ConfigureReserveAsCollateralCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <ConfigureReserveAsCollateralCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::ConfigureReserveAsCollateral(decoded));
             }
-            if let Ok(decoded)
-                = <DropReserveCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <DropReserveCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::DropReserve(decoded));
             }
-            if let Ok(decoded)
-                = <InitReservesCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <InitReservesCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::InitReserves(decoded));
             }
-            if let Ok(decoded)
-                = <SetAssetEModeCategoryCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetAssetEModeCategoryCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetAssetEModeCategory(decoded));
             }
-            if let Ok(decoded)
-                = <SetBorrowCapCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SetBorrowCapCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetBorrowCap(decoded));
             }
-            if let Ok(decoded)
-                = <SetBorrowableInIsolationCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetBorrowableInIsolationCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetBorrowableInIsolation(decoded));
             }
-            if let Ok(decoded)
-                = <SetDebtCeilingCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SetDebtCeilingCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetDebtCeiling(decoded));
             }
-            if let Ok(decoded)
-                = <SetEModeCategoryCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetEModeCategoryCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetEModeCategory(decoded));
             }
-            if let Ok(decoded)
-                = <SetLiquidationProtocolFeeCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetLiquidationProtocolFeeCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetLiquidationProtocolFee(decoded));
             }
-            if let Ok(decoded)
-                = <SetPoolPauseCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SetPoolPauseCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetPoolPause(decoded));
             }
-            if let Ok(decoded)
-                = <SetReserveActiveCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetReserveActiveCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReserveActive(decoded));
             }
-            if let Ok(decoded)
-                = <SetReserveBorrowingCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetReserveBorrowingCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReserveBorrowing(decoded));
             }
-            if let Ok(decoded)
-                = <SetReserveFactorCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetReserveFactorCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReserveFactor(decoded));
             }
-            if let Ok(decoded)
-                = <SetReserveFlashLoaningCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetReserveFlashLoaningCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReserveFlashLoaning(decoded));
             }
-            if let Ok(decoded)
-                = <SetReserveFreezeCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetReserveFreezeCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReserveFreeze(decoded));
             }
-            if let Ok(decoded)
-                = <SetReserveInterestRateStrategyAddressCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetReserveInterestRateStrategyAddressCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReserveInterestRateStrategyAddress(decoded));
             }
-            if let Ok(decoded)
-                = <SetReservePauseCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SetReservePauseCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReservePause(decoded));
             }
-            if let Ok(decoded)
-                = <SetReserveStableRateBorrowingCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetReserveStableRateBorrowingCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetReserveStableRateBorrowing(decoded));
             }
-            if let Ok(decoded)
-                = <SetSiloedBorrowingCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetSiloedBorrowingCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetSiloedBorrowing(decoded));
             }
-            if let Ok(decoded)
-                = <SetSupplyCapCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <SetSupplyCapCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetSupplyCap(decoded));
             }
-            if let Ok(decoded)
-                = <SetUnbackedMintCapCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <SetUnbackedMintCapCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::SetUnbackedMintCap(decoded));
             }
-            if let Ok(decoded)
-                = <UpdateATokenCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <UpdateATokenCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::UpdateAToken(decoded));
             }
-            if let Ok(decoded)
-                = <UpdateBridgeProtocolFeeCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <UpdateBridgeProtocolFeeCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::UpdateBridgeProtocolFee(decoded));
             }
-            if let Ok(decoded)
-                = <UpdateFlashloanPremiumToProtocolCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <UpdateFlashloanPremiumToProtocolCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::UpdateFlashloanPremiumToProtocol(decoded));
             }
-            if let Ok(decoded)
-                = <UpdateFlashloanPremiumTotalCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <UpdateFlashloanPremiumTotalCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::UpdateFlashloanPremiumTotal(decoded));
             }
-            if let Ok(decoded)
-                = <UpdateStableDebtTokenCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <UpdateStableDebtTokenCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::UpdateStableDebtToken(decoded));
             }
-            if let Ok(decoded)
-                = <UpdateVariableDebtTokenCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) = <UpdateVariableDebtTokenCall as ::ethers::core::abi::AbiDecode>::decode(
+                data,
+            ) {
                 return Ok(Self::UpdateVariableDebtToken(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -4025,6 +4140,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthAbiType,
         ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -4053,6 +4170,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthAbiType,
         ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
@@ -4073,6 +4192,8 @@ pub mod i_pool_configurator {
         Clone,
         ::ethers::contract::EthAbiType,
         ::ethers::contract::EthAbiCodec,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,

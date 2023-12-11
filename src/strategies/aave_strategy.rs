@@ -11,7 +11,10 @@ use bindings_aave::{
     l2_encoder::L2Encoder,
     pool::{BorrowFilter, Pool, SupplyFilter},
 };
-use bindings_liquidator::liquidator::Liquidator;
+use bindings_liquidator::{
+    liquidator::Liquidator,
+    liquidator_paraswap::{LiquidationParams, LiquidatorParaswap, SwapParams},
+};
 use clap::{Parser, ValueEnum};
 use ethers::{
     abi::{encode_packed, Token},
@@ -22,6 +25,11 @@ use ethers::{
     },
 };
 use ethers_contract::Multicall;
+use futures::join;
+use paraswap_api::{
+    apis::{configuration::Configuration, prices_api, transactions_api},
+    models::TransactionsRequestPayload,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
@@ -42,10 +50,18 @@ struct DeploymentConfig {
     creation_block: u64,
 }
 
-#[derive(Debug, Clone, Parser, ValueEnum)]
+#[derive(Debug, Clone, Default, Parser, ValueEnum)]
 pub enum Deployment {
     AAVE,
+    #[default]
     SEASHELL,
+}
+
+#[derive(Debug, Clone, Default, Parser, ValueEnum, PartialEq)]
+pub enum DexAggregator {
+    #[default]
+    None,
+    Paraswap,
 }
 
 pub const WETH_ADDRESS: &str = "0x4200000000000000000000000000000000000006";
@@ -60,6 +76,7 @@ pub const LOG_BLOCK_RANGE: u64 = 1000;
 pub const MULTICALL_CHUNK_SIZE: usize = 100;
 pub const STATE_CACHE_FILE: &str = "borrowers.json";
 pub const PRICE_ONE: u64 = 100000000;
+pub const PERCENT_HUNDRED: u64 = 10000;
 
 fn get_deployment_config(deployment: Deployment) -> DeploymentConfig {
     match deployment {
@@ -92,6 +109,7 @@ pub struct StateCache {
 
 struct PoolState {
     prices: HashMap<Address, U256>,
+    flashloan_premium_total: U256
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -126,6 +144,8 @@ pub struct AaveStrategy<M> {
     chain_id: u64,
     config: DeploymentConfig,
     liquidator: Address,
+    dex_aggregator: DexAggregator,
+    paraswap_api_config: Configuration,
 }
 
 impl<M: Middleware + 'static> AaveStrategy<M> {
@@ -134,6 +154,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         config: Config,
         deployment: Deployment,
         liquidator_address: String,
+        dex_aggregator: DexAggregator,
     ) -> Self {
         Self {
             client,
@@ -144,6 +165,8 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             chain_id: config.chain_id,
             config: get_deployment_config(deployment),
             liquidator: Address::from_str(&liquidator_address).expect("invalid liquidator address"),
+            dex_aggregator,
+            paraswap_api_config: Configuration::new(),
         }
     }
 }
@@ -153,7 +176,8 @@ struct LiquidationOpportunity {
     collateral: Address,
     debt: Address,
     debt_to_cover: U256,
-    profit_eth: I256,
+    collateral_to_liquidate: U256,
+    profit_eth: U256,
 }
 
 #[async_trait]
@@ -163,7 +187,11 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for AaveStrategy<M> {
         info!("syncing state");
 
         self.update_token_configs().await?;
-        self.approve_tokens().await?;
+
+        if self.dex_aggregator == DexAggregator::None {
+            self.approve_tokens().await?;
+        }
+
         self.load_cache()?;
         self.update_state().await?;
 
@@ -191,6 +219,11 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
     /// Process new block events, updating the internal state.
     async fn process_new_tick_event(&mut self, event: NewTick) -> Option<Action> {
         info!("received new tick: {:?}", event);
+        self.update_token_configs()
+            .await
+            .map_err(|e| error!("Update token configs error: {}", e))
+            .ok()?;
+
         self.update_state()
             .await
             .map_err(|e| error!("Update State error: {}", e))
@@ -205,7 +238,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
         info!("Best op - profit: {}", op.profit_eth);
 
-        if op.profit_eth < I256::from(0) {
+        if op.profit_eth <= U256::from(0) {
             info!("No profitable ops, passing");
             return None;
         }
@@ -508,7 +541,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         let pool_data =
             IPoolDataProvider::<M>::new(self.config.pool_data_provider, self.client.clone());
 
-        let mut best_bonus: I256 = I256::MIN;
+        let mut best_bonus: U256 = U256::from(0);
         let mut best_op: Option<LiquidationOpportunity> = None;
         let pool_state = self.get_pool_state().await?;
 
@@ -577,6 +610,90 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         Ok(Bytes::from(encoded_swap_path))
     }
 
+    // Returns aggregate swap call data as string
+    async fn get_paraswap_call_data(
+        &self,
+        collateral: &Address,
+        debt: &Address,
+        debt_to_cover: U256,
+    ) -> Result<(Bytes, Address)> {
+        let collateral_config = self
+            .tokens
+            .get(collateral)
+            .ok_or(anyhow!("Failed to get collateral address"))?;
+        let debt_config = self
+            .tokens
+            .get(debt)
+            .ok_or(anyhow!("Failed to get debt address"))?;
+
+        let src_decimals: Option<i32> = collateral_config.decimals.try_into().ok();
+
+        let dest_decimals: Option<i32> = debt_config.decimals.try_into().ok();
+
+        let amount = debt_to_cover.to_string();
+
+        let chain_id: i32 = self.chain_id.try_into()?;
+
+        // debt is the dest token because we want to repay the flash loan with collateral token
+        let prices_params = prices_api::PricesGetParams {
+            src_token: format!("{:?}", collateral),
+            src_decimals,
+            dest_token: format!("{:?}", debt),
+            dest_decimals,
+            amount: amount.clone(),
+            side: prices_api::SwapSide::Buy,
+            network: Some(chain_id),
+            user_address: Some(format!("{:?}", self.liquidator)),
+            ..Default::default()
+        };
+
+        debug!("Prices params: {:?}", prices_params);
+
+        let prices = prices_api::prices_get(&self.paraswap_api_config, prices_params).await?;
+
+        let transaction_params = transactions_api::TransactionsNetworkPostParams {
+            transactions_request_payload: TransactionsRequestPayload {
+                src_token: format!("{:?}", collateral),
+                src_decimals,
+                dest_token: format!("{:?}", debt),
+                dest_decimals,
+                dest_amount: Some(amount.clone()),
+                slippage: Some(9999), // Not concerned with slippage, liquidator will revert if insuffient dest token received from swap
+                user_address: format!("{:?}", self.liquidator),
+                receiver: Some(format!("{:?}", self.liquidator)),
+                price_route: prices
+                    .price_route
+                    .ok_or(anyhow!("Missing paraswap price route response"))?,
+                ..Default::default()
+            },
+            ignore_checks: Some(true),
+            network: chain_id,
+            ..Default::default()
+        };
+
+        debug!("Transaction params: {:?}", transaction_params);
+
+        let transaction = transactions_api::transactions_network_post(
+            &self.paraswap_api_config,
+            transaction_params,
+        )
+        .await?;
+
+        let call_data = Bytes::from_str(
+            &transaction
+                .data
+                .ok_or(anyhow!("Missing paraswap transaction 'data' response"))?,
+        )?;
+
+        let augustus = Address::from_str(
+            &transaction
+                .to
+                .ok_or(anyhow!("Missing paraswap transaction 'to' response"))?,
+        )?;
+
+        Ok((call_data, augustus))
+    }
+
     async fn get_pool_state(&self) -> Result<PoolState> {
         let mut multicall = Multicall::<M>::new(
             self.client.clone(),
@@ -584,7 +701,14 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         )
         .await?;
         let mut prices = HashMap::new();
+        
         let price_oracle = IAaveOracle::<M>::new(self.config.oracle_address, self.client.clone());
+
+        let mut flashloan_premium_total = U256::from(0);
+        if self.dex_aggregator == DexAggregator::Paraswap {
+            let pool = Pool::<M>::new(self.config.pool_address, self.client.clone());
+            flashloan_premium_total = U256::from(pool.flashloan_premium_total().await?);
+        }
 
         for token_address in self.tokens.keys() {
             multicall.add_call(price_oracle.get_asset_price(*token_address), false);
@@ -596,7 +720,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         }
         multicall.clear_calls();
 
-        Ok(PoolState { prices })
+        Ok(PoolState { prices, flashloan_premium_total })
     }
 
     async fn get_liquidation_opportunity(
@@ -626,7 +750,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             .ok_or(anyhow!("Failed to get debt address"))?;
         let collateral_unit = U256::from(10).pow(collateral_config.decimals.into());
         let debt_unit = U256::from(10).pow(debt_config.decimals.into());
-        let liquidation_bonus = collateral_config.liquidation_bonus;
+        let liquidation_bonus = U256::from(collateral_config.liquidation_bonus);
         let a_token = IERC20::new(collateral_config.a_address.clone(), self.client.clone());
 
         let (_, stable_debt, variable_debt, _, _, _, _, _, _) = pool_data
@@ -639,32 +763,70 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         };
 
         let mut debt_to_cover =
-            (stable_debt + variable_debt) * close_factor / MAX_LIQUIDATION_CLOSE_FACTOR;
+            (stable_debt + variable_debt) * close_factor / U256::from(MAX_LIQUIDATION_CLOSE_FACTOR);
         let base_collateral = (debt_asset_price * debt_to_cover * collateral_unit)
             / (collateral_asset_price * debt_unit);
         let mut collateral_to_liquidate = percent_mul(base_collateral, liquidation_bonus);
         let user_collateral_balance = a_token.balance_of(*borrower_address).await?;
 
+        debug!("debt_to_cover: {:?}", debt_to_cover);
+        debug!(
+            "collateral_to_liquidate: {:?}, user_collateral_balance: {:?}",
+            collateral_to_liquidate, user_collateral_balance
+        );
+
         if collateral_to_liquidate > user_collateral_balance {
             collateral_to_liquidate = user_collateral_balance;
-            debt_to_cover = (collateral_asset_price * collateral_to_liquidate * debt_unit)
-                / percent_div(debt_asset_price * collateral_unit, liquidation_bonus);
+
+            debug!("collateral_asset_price: {:?}, collateral_to_liquidate: {:?}, debt_unit: {:?}, debt_asset_price: {:?}, collateral_unit: {:?}, liquidation_bonus: {:?}", collateral_asset_price, collateral_to_liquidate, debt_unit, debt_asset_price, collateral_unit, liquidation_bonus);
+
+            // round up debt to cover.
+            let divisor = percent_div(debt_asset_price * collateral_unit, liquidation_bonus);
+            debt_to_cover = ((collateral_asset_price * collateral_to_liquidate * debt_unit)
+                + (divisor / 2))
+                / divisor;
         }
+
+        info!("debt_to_cover: {:?}", debt_to_cover);
 
         let mut op = LiquidationOpportunity {
             borrower: borrower_address.clone(),
             collateral: collateral_address.clone(),
             debt: debt_address.clone(),
             debt_to_cover,
-            profit_eth: I256::from(0),
+            collateral_to_liquidate,
+            profit_eth: U256::from(0),
         };
 
-        let gain = self.build_liquidation_call(&op).await?.call().await?;
+        if self.dex_aggregator == DexAggregator::Paraswap {
+            let (collateral_gain, debt_gain) = self
+                .build_liquidation_paraswap_call(&op, pool_state)
+                .await?
+                .call()
+                .await?;
 
-        let weth_price = self
-            .get_asset_price_eth(collateral_address, pool_state)
-            .await?;
-        op.profit_eth = gain * I256::from_dec_str(&weth_price.to_string())? / I256::from(PRICE_ONE);
+            let (weth_price_collateral, weth_price_debt) = join!(
+                self.get_asset_price_eth(&op.collateral, pool_state),
+                self.get_asset_price_eth(&op.debt, pool_state)
+            );
+
+            let profit = (collateral_gain * weth_price_collateral? / U256::from(PRICE_ONE))
+                + (debt_gain * weth_price_debt? / U256::from(PRICE_ONE));
+
+            op.profit_eth = profit;
+        } else {
+            let gain = self.build_liquidation_call(&op).await?.call().await?;
+
+            let weth_price = self.get_asset_price_eth(&op.collateral, pool_state).await?;
+
+            let profit =
+                gain * I256::from_dec_str(&weth_price.to_string())? / I256::from(PRICE_ONE);
+
+            op.profit_eth = match profit < I256::from(0) {
+                true => U256::from(0),
+                false => U256::try_from(profit)?,
+            };
+        }
 
         info!(
             "Found opportunity - borrower: {:?}, collateral: {:?}, debt: {:?}, profit_eth: {:?}",
@@ -674,21 +836,64 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         Ok(op)
     }
 
-    async fn build_liquidation_call(
+    async fn build_liquidation_paraswap_call(
         &self,
         op: &LiquidationOpportunity,
-    ) -> Result<ContractCall<M, I256>> {
+        pool_state: &PoolState,
+    ) -> Result<ContractCall<M, (U256, U256)>> {
         info!(
-            "Build - borrower: {:?}, collateral: {:?}, debt: {:?}, debt_to_cover: {:?}, profit_eth: {:?}",
-            op.borrower, op.collateral, op.debt, op.debt_to_cover, op.profit_eth
+            "Build - borrower: {:?}, collateral: {:?}, debt: {:?}, debt_to_cover: {:?}, collateral_to_liquidate: {:?}, profit_eth: {:?}",
+            op.borrower, op.collateral, op.debt, op.debt_to_cover, op.collateral_to_liquidate, op.profit_eth
         );
 
-        let liquidator = Liquidator::new(self.liquidator, self.client.clone());
         let encoder = L2Encoder::new(self.config.l2_encoder, self.client.clone());
         let (data0, data1) = encoder
             .encode_liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
             .call()
             .await?;
+
+        let liquidator_paraswap = LiquidatorParaswap::new(self.liquidator, self.client.clone());
+        let swap_dest_amount = percent_mul(op.debt_to_cover, pool_state.flashloan_premium_total + U256::from(PERCENT_HUNDRED));
+        let (paraswap_call_data, paraswap_augustus) = self
+            .get_paraswap_call_data(&op.collateral, &op.debt, swap_dest_amount)
+            .await?;
+
+        let contract_call = liquidator_paraswap.liquidate(
+            LiquidationParams {
+                collateral: op.collateral,
+                debt: op.debt,
+                debt_to_cover: op.debt_to_cover,
+                liquidation_arg_1: data0,
+                liquidation_arg_2: data1,
+            },
+            self.config.pool_address,
+            SwapParams {
+                augustus: paraswap_augustus,
+                swap_call_data: paraswap_call_data,
+            },
+        );
+
+        info!("Liquidation op contract call: {:?}", contract_call);
+
+        return Ok(contract_call);
+    }
+
+    async fn build_liquidation_call(
+        &self,
+        op: &LiquidationOpportunity,
+    ) -> Result<ContractCall<M, I256>> {
+        info!(
+            "Build - borrower: {:?}, collateral: {:?}, debt: {:?}, debt_to_cover: {:?}, collateral_to_liquidate: {:?}, profit_eth: {:?}",
+            op.borrower, op.collateral, op.debt, op.debt_to_cover, op.collateral_to_liquidate, op.profit_eth
+        );
+
+        let encoder = L2Encoder::new(self.config.l2_encoder, self.client.clone());
+        let (data0, data1) = encoder
+            .encode_liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
+            .call()
+            .await?;
+
+        let liquidator = Liquidator::new(self.liquidator, self.client.clone());
 
         let swap_path = self.get_swap_path(&op.collateral, &op.debt)?;
 
@@ -711,11 +916,11 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
     }
 }
 
-fn percent_mul(a: U256, bps: u64) -> U256 {
-    (U256::from(5000) + (a * bps)) / U256::from(10000)
+fn percent_mul(a: U256, bps: U256) -> U256 {
+    (U256::from(5000) + (a * bps)) / U256::from(PERCENT_HUNDRED)
 }
 
-fn percent_div(a: U256, bps: u64) -> U256 {
-    let half_bps = bps / 2;
-    (U256::from(half_bps) + (a * 10000)) / bps
+fn percent_div(a: U256, bps: U256) -> U256 {
+    let half_bps = bps / U256::from(2);
+    (half_bps + (a * U256::from(PERCENT_HUNDRED))) / bps
 }

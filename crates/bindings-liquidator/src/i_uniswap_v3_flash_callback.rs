@@ -128,6 +128,8 @@ pub mod i_uniswap_v3_flash_callback {
         Clone,
         ::ethers::contract::EthCall,
         ::ethers::contract::EthDisplay,
+        serde::Serialize,
+        serde::Deserialize,
         Default,
         Debug,
         PartialEq,
