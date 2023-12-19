@@ -657,13 +657,26 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
         let prices = prices_api::prices_get(&self.paraswap_api_config, prices_params).await?;
 
+        let dest_amount = if is_buy {
+            Some(amount.clone())
+        } else {
+            None
+        };
+
+        let src_amount = if is_buy {
+            None
+        } else {
+            Some(amount.clone())
+        };
+
         let transaction_params = transactions_api::TransactionsNetworkPostParams {
             transactions_request_payload: TransactionsRequestPayload {
                 src_token: format!("{:?}", collateral),
                 src_decimals,
+                src_amount,
                 dest_token: format!("{:?}", debt),
                 dest_decimals,
-                dest_amount: Some(amount.clone()),
+                dest_amount,
                 slippage: Some(9999), // Not concerned with slippage, liquidator will revert if insuffient dest token received from swap
                 user_address: format!("{:?}", self.liquidator),
                 receiver: Some(format!("{:?}", self.liquidator)),
