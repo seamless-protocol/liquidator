@@ -825,7 +825,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
         if self.dex_aggregator == DexAggregator::Paraswap {
             let (collateral_gain, debt_gain) = self
-                .build_liquidation_paraswap_call(&op, pool_state)
+                .build_liquidation_paraswap_call(&op)
                 .await?
                 .call()
                 .await?;
@@ -864,7 +864,6 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
     async fn build_liquidation_paraswap_call(
         &self,
         op: &LiquidationOpportunity,
-        pool_state: &PoolState,
     ) -> Result<ContractCall<M, (U256, U256)>> {
         info!(
             "Build - borrower: {:?}, collateral: {:?}, debt: {:?}, debt_to_cover: {:?}, collateral_to_liquidate: {:?}, profit_eth: {:?}",
@@ -878,10 +877,6 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             .await?;
 
         let liquidator_paraswap = LiquidatorParaswap::new(self.liquidator, self.client.clone());
-        // let swap_dest_amount = percent_mul(
-        //     op.debt_to_cover,
-        //     pool_state.flashloan_premium_total + U256::from(PERCENT_HUNDRED),
-        // );
         let (paraswap_call_data, paraswap_augustus) = self
             .get_paraswap_call_data(&op.collateral, &op.debt, op.collateral_to_liquidate, false)
             .await?;
@@ -939,8 +934,13 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
     }
 
     async fn build_liquidation(&self, op: &LiquidationOpportunity) -> Result<TypedTransaction> {
-        let mut call = self.build_liquidation_call(op).await?;
-        Ok(call.tx.set_chain_id(self.chain_id).clone())
+        if self.dex_aggregator == DexAggregator::Paraswap {
+            let mut call = self.build_liquidation_paraswap_call(op).await?;
+            Ok(call.tx.set_chain_id(self.chain_id).clone())
+        } else {
+            let mut call = self.build_liquidation_call(op).await?;
+            Ok(call.tx.set_chain_id(self.chain_id).clone())
+        }
     }
 }
 
