@@ -553,7 +553,6 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
             for collateral_address in &borrower_details.collateral {
                 for debt_address in &borrower_details.debt {
-                    // TODO: handle case where collateral and debt are same asset
                     if collateral_address.ne(debt_address) {
                         if let Some(op) = self
                             .get_liquidation_opportunity(
@@ -756,11 +755,14 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         let (_, stable_debt, variable_debt, _, _, _, _, _, _) = pool_data
             .get_user_reserve_data(*debt_address, *borrower_address)
             .await?;
+        
+        debug!("health_factor: {:?}", health_factor);
         let close_factor = if health_factor.gt(&U256::from(LIQUIDATION_CLOSE_FACTOR_THRESHOLD)) {
             U256::from(DEFAULT_LIQUIDATION_CLOSE_FACTOR)
         } else {
             U256::from(MAX_LIQUIDATION_CLOSE_FACTOR)
         };
+        debug!("close_factor: {:?}", close_factor);
 
         let mut debt_to_cover =
             (stable_debt + variable_debt) * close_factor / U256::from(MAX_LIQUIDATION_CLOSE_FACTOR);

@@ -5,7 +5,7 @@ This is an [Artemis](https://github.com/paradigmxyz/artemis) bot that liquidates
 # Getting Started
 
 1. Install Rust [ref](https://doc.rust-lang.org/book/ch01-01-installation.html)
-    - Install deps: `sudo apt install -y build-essential libssl-dev` (Linux) or `xcode-select --install` (Mac)
+    - Install deps: `sudo apt install -y build-essential libssl-dev pkg-config` (Linux) or `xcode-select --install` (Mac)
 
 2. Install Foundry [ref](https://book.getfoundry.sh/getting-started/installation)
 

@@ -56,8 +56,8 @@ async fn main() -> Result<()> {
     // Set up tracing and parse args.
     let filter = filter::Targets::new()
         .with_target("artemis_core", Level::INFO)
-        .with_target("seamless_liquidator", Level::INFO)
-        .with_target("paraswap_api", Level::INFO);
+        .with_target("seamless_liquidator", Level::DEBUG)
+        .with_target("paraswap_api", Level::DEBUG);
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
