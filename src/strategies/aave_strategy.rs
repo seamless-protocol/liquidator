@@ -870,7 +870,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         //     pool_state.flashloan_premium_total + U256::from(PERCENT_HUNDRED),
         // );
         let (paraswap_call_data, paraswap_augustus) = self
-            .get_paraswap_call_data(&op.collateral, &op.debt, op.collateral_to_liquidate, true)
+            .get_paraswap_call_data(&op.collateral, &op.debt, op.collateral_to_liquidate, false)
             .await?;
 
         let contract_call = liquidator_paraswap.liquidate(
