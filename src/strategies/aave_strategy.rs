@@ -109,7 +109,7 @@ pub struct StateCache {
 
 struct PoolState {
     prices: HashMap<Address, U256>,
-    flashloan_premium_total: U256
+    flashloan_premium_total: U256,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -614,7 +614,8 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         &self,
         collateral: &Address,
         debt: &Address,
-        debt_to_cover: U256,
+        amount: U256,
+        is_buy: bool,
     ) -> Result<(Bytes, Address)> {
         let collateral_config = self
             .tokens
@@ -629,9 +630,15 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
         let dest_decimals: Option<i32> = debt_config.decimals.try_into().ok();
 
-        let amount = debt_to_cover.to_string();
+        let amount = amount.to_string();
 
         let chain_id: i32 = self.chain_id.try_into()?;
+
+        let side = if is_buy {
+            prices_api::SwapSide::Buy
+        } else {
+            prices_api::SwapSide::Sell
+        };
 
         // debt is the dest token because we want to repay the flash loan with collateral token
         let prices_params = prices_api::PricesGetParams {
@@ -640,7 +647,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             dest_token: format!("{:?}", debt),
             dest_decimals,
             amount: amount.clone(),
-            side: prices_api::SwapSide::Buy,
+            side,
             network: Some(chain_id),
             user_address: Some(format!("{:?}", self.liquidator)),
             ..Default::default()
@@ -700,7 +707,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         )
         .await?;
         let mut prices = HashMap::new();
-        
+
         let price_oracle = IAaveOracle::<M>::new(self.config.oracle_address, self.client.clone());
 
         let mut flashloan_premium_total = U256::from(0);
@@ -719,7 +726,10 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         }
         multicall.clear_calls();
 
-        Ok(PoolState { prices, flashloan_premium_total })
+        Ok(PoolState {
+            prices,
+            flashloan_premium_total,
+        })
     }
 
     async fn get_liquidation_opportunity(
@@ -755,7 +765,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         let (_, stable_debt, variable_debt, _, _, _, _, _, _) = pool_data
             .get_user_reserve_data(*debt_address, *borrower_address)
             .await?;
-        
+
         debug!("health_factor: {:?}", health_factor);
         let close_factor = if health_factor.gt(&U256::from(LIQUIDATION_CLOSE_FACTOR_THRESHOLD)) {
             U256::from(DEFAULT_LIQUIDATION_CLOSE_FACTOR)
@@ -855,9 +865,12 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             .await?;
 
         let liquidator_paraswap = LiquidatorParaswap::new(self.liquidator, self.client.clone());
-        let swap_dest_amount = percent_mul(op.debt_to_cover, pool_state.flashloan_premium_total + U256::from(PERCENT_HUNDRED));
+        // let swap_dest_amount = percent_mul(
+        //     op.debt_to_cover,
+        //     pool_state.flashloan_premium_total + U256::from(PERCENT_HUNDRED),
+        // );
         let (paraswap_call_data, paraswap_augustus) = self
-            .get_paraswap_call_data(&op.collateral, &op.debt, swap_dest_amount)
+            .get_paraswap_call_data(&op.collateral, &op.debt, op.collateral_to_liquidate, true)
             .await?;
 
         let contract_call = liquidator_paraswap.liquidate(
