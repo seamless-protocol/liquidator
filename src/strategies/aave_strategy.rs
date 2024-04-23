@@ -37,6 +37,7 @@ use std::io::Write;
 use std::iter::zip;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::{thread, time};
 use tracing::{debug, error, info};
 
 use super::types::{Action, Event};
@@ -617,6 +618,8 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         amount: U256,
         is_buy: bool,
     ) -> Result<(Bytes, Address)> {
+        thread::sleep(time::Duration::from_millis(1000));   // Sleep to get around rate limits
+
         let collateral_config = self
             .tokens
             .get(collateral)
