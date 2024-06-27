@@ -5,22 +5,22 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {IPool} from "./interfaces/IPool.sol";
+import {IL2Pool} from "./interfaces/IL2Pool.sol";
 import {IFlashLoanReceiver} from "./interfaces/IFlashLoanReceiver.sol";
 import {IFlashLoan} from "./interfaces/IFlashLoan.sol";
 import {IAugustusRegistry} from "./interfaces/IAugustusRegistry.sol";
 import {IAugustus} from "./interfaces/IAugustus.sol";
-import {ILiquidatorParaswap} from "./interfaces/ILiquidatorParaswap.sol";
+import {ILiquidatorParaswapL2} from "./interfaces/ILiquidatorParaswapL2.sol";
 
-contract LiquidatorParaswap is ILiquidatorParaswap, IFlashLoanReceiver, Ownable {
-    IPool public constant POOL = IPool(0x8F44Fd754285aa6A2b8B9B97739B79746e0475a7);
+contract LiquidatorParaswapL2 is ILiquidatorParaswapL2, IFlashLoanReceiver, Ownable {
+    IL2Pool public constant POOL = IL2Pool(0x8F44Fd754285aa6A2b8B9B97739B79746e0475a7);
     IAugustusRegistry public constant AUGUSTUS_REGISTRY = IAugustusRegistry(0x7E31B336F9E8bA52ba3c4ac861b033Ba90900bb3);
 
     IFlashLoan private _flashPool;
 
     constructor() Ownable(msg.sender) {}
 
-    /// @inheritdoc ILiquidatorParaswap
+    /// @inheritdoc ILiquidatorParaswapL2
     function liquidate(
         LiquidationParams calldata liquidationParams,
         IFlashLoan flashLoanPool,
@@ -42,7 +42,8 @@ contract LiquidatorParaswap is ILiquidatorParaswap, IFlashLoanReceiver, Ownable 
                 FlashLoanCallbackData({
                     debtBalanceBefore: debtBalanceBefore,
                     collateral: liquidationParams.collateral,
-                    liquidationCallData: liquidationParams.liquidationCallData,
+                    liquidationArg1: liquidationParams.liquidationArg1,
+                    liquidationArg2: liquidationParams.liquidationArg2,
                     swapParams: swapParams
                 })
             ),
@@ -77,7 +78,8 @@ contract LiquidatorParaswap is ILiquidatorParaswap, IFlashLoanReceiver, Ownable 
             IERC20(assets[0]),
             params.collateral,
             amounts[0],
-            params.liquidationCallData,
+            params.liquidationArg1,
+            params.liquidationArg2,
             params.swapParams.swapCallData
         );
 
@@ -99,23 +101,22 @@ contract LiquidatorParaswap is ILiquidatorParaswap, IFlashLoanReceiver, Ownable 
     /// @param debt Debt ERC20 token that is used to repay the liquidatable debt
     /// @param collateral Collateral ERC20 token received for liquidating position
     /// @param debtToCover The amount of debt to repay
-    /// @param liquidationCallData Calldata for liquidationCall
+    /// @param liquidationArg1 Calldata efficient argument 1 to pass to liquidationCall
+    /// @param liquidationArg2 Calldata efficient argument 2 to pass to liquidationCall
     /// @param swapCallData Abi encoded data to execute swap on Paraswap
     function _liquidateAndSwap(
         IAugustus augustus,
         IERC20 debt,
         IERC20 collateral,
         uint256 debtToCover,
-        bytes memory liquidationCallData,
+        bytes32 liquidationArg1,
+        bytes32 liquidationArg2,
         bytes memory swapCallData
     ) internal {
         uint256 collateralBalanceBefore = collateral.balanceOf(address(this));
 
         SafeERC20.forceApprove(debt, address(POOL), debtToCover);
-        (bool success,) = address(POOL).call(liquidationCallData);
-        if (!success) {
-            revert FailedLiquidationCall();
-        }
+        POOL.liquidationCall(liquidationArg1, liquidationArg2);
 
         uint256 collateralReceived = collateral.balanceOf(address(this)) - collateralBalanceBefore;
 

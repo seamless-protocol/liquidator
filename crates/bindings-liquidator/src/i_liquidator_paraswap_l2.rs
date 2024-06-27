@@ -1,4 +1,4 @@
-pub use i_liquidator_paraswap::*;
+pub use i_liquidator_paraswap_l2::*;
 /// This module was auto-generated with ethers-rs Abigen.
 /// More information at: <https://github.com/gakonst/ethers-rs>
 #[allow(
@@ -9,7 +9,7 @@ pub use i_liquidator_paraswap::*;
     dead_code,
     non_camel_case_types,
 )]
-pub mod i_liquidator_paraswap {
+pub mod i_liquidator_paraswap_l2 {
     pub use super::super::shared_types::*;
     #[allow(deprecated)]
     fn __abi() -> ::ethers::core::abi::Abi {
@@ -29,12 +29,13 @@ pub mod i_liquidator_paraswap {
                                             ::ethers::core::abi::ethabi::ParamType::Address,
                                             ::ethers::core::abi::ethabi::ParamType::Address,
                                             ::ethers::core::abi::ethabi::ParamType::Uint(256usize),
-                                            ::ethers::core::abi::ethabi::ParamType::Bytes,
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
+                                            ::ethers::core::abi::ethabi::ParamType::FixedBytes(32usize),
                                         ],
                                     ),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "struct ILiquidatorParaswap.LiquidationParams",
+                                            "struct ILiquidatorParaswapL2.LiquidationParams",
                                         ),
                                     ),
                                 },
@@ -55,7 +56,7 @@ pub mod i_liquidator_paraswap {
                                     ),
                                     internal_type: ::core::option::Option::Some(
                                         ::std::borrow::ToOwned::to_owned(
-                                            "struct ILiquidatorParaswap.SwapParams",
+                                            "struct ILiquidatorParaswapL2.SwapParams",
                                         ),
                                     ),
                                 },
@@ -88,17 +89,6 @@ pub mod i_liquidator_paraswap {
             ]),
             events: ::std::collections::BTreeMap::new(),
             errors: ::core::convert::From::from([
-                (
-                    ::std::borrow::ToOwned::to_owned("FailedLiquidationCall"),
-                    ::std::vec![
-                        ::ethers::core::abi::ethabi::AbiError {
-                            name: ::std::borrow::ToOwned::to_owned(
-                                "FailedLiquidationCall",
-                            ),
-                            inputs: ::std::vec![],
-                        },
-                    ],
-                ),
                 (
                     ::std::borrow::ToOwned::to_owned("InvalidAugustusInstance"),
                     ::std::vec![
@@ -177,34 +167,34 @@ pub mod i_liquidator_paraswap {
         }
     }
     ///The parsed JSON ABI of the contract.
-    pub static ILIQUIDATORPARASWAP_ABI: ::ethers::contract::Lazy<
+    pub static ILIQUIDATORPARASWAPL2_ABI: ::ethers::contract::Lazy<
         ::ethers::core::abi::Abi,
     > = ::ethers::contract::Lazy::new(__abi);
-    pub struct ILiquidatorParaswap<M>(::ethers::contract::Contract<M>);
-    impl<M> ::core::clone::Clone for ILiquidatorParaswap<M> {
+    pub struct ILiquidatorParaswapL2<M>(::ethers::contract::Contract<M>);
+    impl<M> ::core::clone::Clone for ILiquidatorParaswapL2<M> {
         fn clone(&self) -> Self {
             Self(::core::clone::Clone::clone(&self.0))
         }
     }
-    impl<M> ::core::ops::Deref for ILiquidatorParaswap<M> {
+    impl<M> ::core::ops::Deref for ILiquidatorParaswapL2<M> {
         type Target = ::ethers::contract::Contract<M>;
         fn deref(&self) -> &Self::Target {
             &self.0
         }
     }
-    impl<M> ::core::ops::DerefMut for ILiquidatorParaswap<M> {
+    impl<M> ::core::ops::DerefMut for ILiquidatorParaswapL2<M> {
         fn deref_mut(&mut self) -> &mut Self::Target {
             &mut self.0
         }
     }
-    impl<M> ::core::fmt::Debug for ILiquidatorParaswap<M> {
+    impl<M> ::core::fmt::Debug for ILiquidatorParaswapL2<M> {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_tuple(::core::stringify!(ILiquidatorParaswap))
+            f.debug_tuple(::core::stringify!(ILiquidatorParaswapL2))
                 .field(&self.address())
                 .finish()
         }
     }
-    impl<M: ::ethers::providers::Middleware> ILiquidatorParaswap<M> {
+    impl<M: ::ethers::providers::Middleware> ILiquidatorParaswapL2<M> {
         /// Creates a new contract instance with the specified `ethers` client at
         /// `address`. The contract derefs to a `ethers::Contract` object.
         pub fn new<T: Into<::ethers::core::types::Address>>(
@@ -214,12 +204,12 @@ pub mod i_liquidator_paraswap {
             Self(
                 ::ethers::contract::Contract::new(
                     address.into(),
-                    ILIQUIDATORPARASWAP_ABI.clone(),
+                    ILIQUIDATORPARASWAPL2_ABI.clone(),
                     client,
                 ),
             )
         }
-        ///Calls the contract's `liquidate` (0x903ca217) function
+        ///Calls the contract's `liquidate` (0xc3a28091) function
         pub fn liquidate(
             &self,
             liquidation_params: LiquidationParams,
@@ -231,33 +221,18 @@ pub mod i_liquidator_paraswap {
         > {
             self.0
                 .method_hash(
-                    [144, 60, 162, 23],
+                    [195, 162, 128, 145],
                     (liquidation_params, flash_loan_pool, swap_params),
                 )
                 .expect("method not found (this should never happen)")
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for ILiquidatorParaswap<M> {
+    for ILiquidatorParaswapL2<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
     }
-    ///Custom Error type `FailedLiquidationCall` with signature `FailedLiquidationCall()` and selector `0xffd4c3da`
-    #[derive(
-        Clone,
-        ::ethers::contract::EthError,
-        ::ethers::contract::EthDisplay,
-        serde::Serialize,
-        serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash
-    )]
-    #[etherror(name = "FailedLiquidationCall", abi = "FailedLiquidationCall()")]
-    pub struct FailedLiquidationCall;
     ///Custom Error type `InvalidAugustusInstance` with signature `InvalidAugustusInstance(address)` and selector `0x5b159995`
     #[derive(
         Clone,
@@ -332,8 +307,7 @@ pub mod i_liquidator_paraswap {
         Eq,
         Hash
     )]
-    pub enum ILiquidatorParaswapErrors {
-        FailedLiquidationCall(FailedLiquidationCall),
+    pub enum ILiquidatorParaswapL2Errors {
         InvalidAugustusInstance(InvalidAugustusInstance),
         InvalidDebtBalance(InvalidDebtBalance),
         InvalidInitiator(InvalidInitiator),
@@ -342,7 +316,7 @@ pub mod i_liquidator_paraswap {
         /// Error(string) -- 0x08c379a0
         RevertString(::std::string::String),
     }
-    impl ::ethers::core::abi::AbiDecode for ILiquidatorParaswapErrors {
+    impl ::ethers::core::abi::AbiDecode for ILiquidatorParaswapL2Errors {
         fn decode(
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
@@ -351,11 +325,6 @@ pub mod i_liquidator_paraswap {
                 data,
             ) {
                 return Ok(Self::RevertString(decoded));
-            }
-            if let Ok(decoded) = <FailedLiquidationCall as ::ethers::core::abi::AbiDecode>::decode(
-                data,
-            ) {
-                return Ok(Self::FailedLiquidationCall(decoded));
             }
             if let Ok(decoded) = <InvalidAugustusInstance as ::ethers::core::abi::AbiDecode>::decode(
                 data,
@@ -380,12 +349,9 @@ pub mod i_liquidator_paraswap {
             Err(::ethers::core::abi::Error::InvalidData.into())
         }
     }
-    impl ::ethers::core::abi::AbiEncode for ILiquidatorParaswapErrors {
+    impl ::ethers::core::abi::AbiEncode for ILiquidatorParaswapL2Errors {
         fn encode(self) -> ::std::vec::Vec<u8> {
             match self {
-                Self::FailedLiquidationCall(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
                 Self::InvalidAugustusInstance(element) => {
                     ::ethers::core::abi::AbiEncode::encode(element)
                 }
@@ -402,14 +368,10 @@ pub mod i_liquidator_paraswap {
             }
         }
     }
-    impl ::ethers::contract::ContractRevert for ILiquidatorParaswapErrors {
+    impl ::ethers::contract::ContractRevert for ILiquidatorParaswapL2Errors {
         fn valid_selector(selector: [u8; 4]) -> bool {
             match selector {
                 [0x08, 0xc3, 0x79, 0xa0] => true,
-                _ if selector
-                    == <FailedLiquidationCall as ::ethers::contract::EthError>::selector() => {
-                    true
-                }
                 _ if selector
                     == <InvalidAugustusInstance as ::ethers::contract::EthError>::selector() => {
                     true
@@ -430,12 +392,9 @@ pub mod i_liquidator_paraswap {
             }
         }
     }
-    impl ::core::fmt::Display for ILiquidatorParaswapErrors {
+    impl ::core::fmt::Display for ILiquidatorParaswapL2Errors {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
-                Self::FailedLiquidationCall(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
                 Self::InvalidAugustusInstance(element) => {
                     ::core::fmt::Display::fmt(element, f)
                 }
@@ -448,37 +407,32 @@ pub mod i_liquidator_paraswap {
             }
         }
     }
-    impl ::core::convert::From<::std::string::String> for ILiquidatorParaswapErrors {
+    impl ::core::convert::From<::std::string::String> for ILiquidatorParaswapL2Errors {
         fn from(value: String) -> Self {
             Self::RevertString(value)
         }
     }
-    impl ::core::convert::From<FailedLiquidationCall> for ILiquidatorParaswapErrors {
-        fn from(value: FailedLiquidationCall) -> Self {
-            Self::FailedLiquidationCall(value)
-        }
-    }
-    impl ::core::convert::From<InvalidAugustusInstance> for ILiquidatorParaswapErrors {
+    impl ::core::convert::From<InvalidAugustusInstance> for ILiquidatorParaswapL2Errors {
         fn from(value: InvalidAugustusInstance) -> Self {
             Self::InvalidAugustusInstance(value)
         }
     }
-    impl ::core::convert::From<InvalidDebtBalance> for ILiquidatorParaswapErrors {
+    impl ::core::convert::From<InvalidDebtBalance> for ILiquidatorParaswapL2Errors {
         fn from(value: InvalidDebtBalance) -> Self {
             Self::InvalidDebtBalance(value)
         }
     }
-    impl ::core::convert::From<InvalidInitiator> for ILiquidatorParaswapErrors {
+    impl ::core::convert::From<InvalidInitiator> for ILiquidatorParaswapL2Errors {
         fn from(value: InvalidInitiator) -> Self {
             Self::InvalidInitiator(value)
         }
     }
-    impl ::core::convert::From<SenderNotPool> for ILiquidatorParaswapErrors {
+    impl ::core::convert::From<SenderNotPool> for ILiquidatorParaswapL2Errors {
         fn from(value: SenderNotPool) -> Self {
             Self::SenderNotPool(value)
         }
     }
-    ///Container type for all input parameters for the `liquidate` function with signature `liquidate((address,address,uint256,bytes),address,(address,bytes))` and selector `0x903ca217`
+    ///Container type for all input parameters for the `liquidate` function with signature `liquidate((address,address,uint256,bytes32,bytes32),address,(address,bytes))` and selector `0xc3a28091`
     #[derive(
         Clone,
         ::ethers::contract::EthCall,
@@ -493,14 +447,14 @@ pub mod i_liquidator_paraswap {
     )]
     #[ethcall(
         name = "liquidate",
-        abi = "liquidate((address,address,uint256,bytes),address,(address,bytes))"
+        abi = "liquidate((address,address,uint256,bytes32,bytes32),address,(address,bytes))"
     )]
     pub struct LiquidateCall {
         pub liquidation_params: LiquidationParams,
         pub flash_loan_pool: ::ethers::core::types::Address,
         pub swap_params: SwapParams,
     }
-    ///Container type for all return fields from the `liquidate` function with signature `liquidate((address,address,uint256,bytes),address,(address,bytes))` and selector `0x903ca217`
+    ///Container type for all return fields from the `liquidate` function with signature `liquidate((address,address,uint256,bytes32,bytes32),address,(address,bytes))` and selector `0xc3a28091`
     #[derive(
         Clone,
         ::ethers::contract::EthAbiType,

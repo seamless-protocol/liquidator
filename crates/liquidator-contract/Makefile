@@ -17,6 +17,8 @@ test                    :; forge test -vvvv --gas-report
 # Deploy
 deploy-liquidator			:; forge create ./src/Liquidator.sol:Liquidator --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL}
 deploy-liquidator-paraswap	:; forge create ./src/LiquidatorParaswap.sol:LiquidatorParaswap --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL}
+deploy-liquidatorl2			:; forge create ./src/LiquidatorL2.sol:LiquidatorL2 --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL}
+deploy-liquidator-paraswapl2	:; forge create ./src/LiquidatorParaswapL2.sol:LiquidatorParaswapL2 --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL}
 deploy-mock-aggregator		:; forge create ./test/util/MockAggregator.sol:MockAggregator --private-key ${PRIVATE_KEY} --rpc-url ${RPC_URL}
 
 run-fork-setup				:; forge script ./script/ForkSetup.s.sol:ForkSetupScript --rpc-url ${RPC_URL} --slow --broadcast -vvvv --unlocked --sender 0x39E6b01214B15F6cc6339648511e3C91Ecd10dc7

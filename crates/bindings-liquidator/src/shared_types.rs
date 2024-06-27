@@ -1,4 +1,4 @@
-///`LiquidationParams(address,address,uint256,bytes32,bytes32)`
+///`LiquidationParams(address,address,uint256,bytes)`
 #[derive(
     Clone,
     ::ethers::contract::EthAbiType,
@@ -15,8 +15,7 @@ pub struct LiquidationParams {
     pub collateral: ::ethers::core::types::Address,
     pub debt: ::ethers::core::types::Address,
     pub debt_to_cover: ::ethers::core::types::U256,
-    pub liquidation_arg_1: [u8; 32],
-    pub liquidation_arg_2: [u8; 32],
+    pub liquidation_call_data: ::ethers::core::types::Bytes,
 }
 ///`SwapParams(address,bytes)`
 #[derive(

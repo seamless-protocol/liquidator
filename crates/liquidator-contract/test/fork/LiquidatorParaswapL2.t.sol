@@ -2,18 +2,19 @@
 pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
+import {IL2Pool} from "../../src/interfaces/IL2Pool.sol";
 import {IPool} from "../../src/interfaces/IPool.sol";
 import {IAugustusRegistry} from "../../src/interfaces/IAugustusRegistry.sol";
 import {IAugustus} from "../../src/interfaces/IAugustus.sol";
 import {Constants} from "../util/Constants.sol";
-import {LiquidatorTestHelper} from "../util/LiquidatorTestHelper.sol";
+import {LiquidatorTestHelperL2} from "../util/LiquidatorTestHelperL2.sol";
 import {MockParaSwapTokenTransferProxy} from "../util/MockParaSwapTokenTransferProxy.sol";
-import {LiquidatorParaswap} from "../../src/LiquidatorParaswap.sol";
-import {ILiquidatorParaswap} from "../../src/interfaces/ILiquidatorParaswap.sol";
+import {LiquidatorParaswapL2} from "../../src/LiquidatorParaswapL2.sol";
+import {ILiquidatorParaswapL2} from "../../src/interfaces/ILiquidatorParaswapL2.sol";
 import {IFlashLoan} from "../../src/interfaces/IFlashLoan.sol";
 
-contract LiquidatorParaswapTest is LiquidatorTestHelper {
-    LiquidatorParaswap liquidator;
+contract LiquidatorParaswapL2Test is LiquidatorTestHelperL2 {
+    LiquidatorParaswapL2 liquidator;
     MockParaSwapTokenTransferProxy augustusAndTransferProxy;
 
     address augustusRegistry;
@@ -25,7 +26,7 @@ contract LiquidatorParaswapTest is LiquidatorTestHelper {
     function setUp() public override {
         super.setUp();
 
-        liquidator = new LiquidatorParaswap();
+        liquidator = new LiquidatorParaswapL2();
         pool = liquidator.POOL();
         augustusRegistry = address(liquidator.AUGUSTUS_REGISTRY());
         augustusAndTransferProxy = new MockParaSwapTokenTransferProxy();
@@ -40,13 +41,13 @@ contract LiquidatorParaswapTest is LiquidatorTestHelper {
     }
 
     function test_RevertIfNot_FlashPool() public {
-        vm.expectRevert(abi.encodeWithSelector(ILiquidatorParaswap.SenderNotPool.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(ILiquidatorParaswapL2.SenderNotPool.selector, address(this)));
         liquidator.executeOperation(new address[](0), new uint256[](0), new uint256[](0), address(this), abi.encode());
     }
 
     function test_RevertIfNot_SelfInitiator() public {
         vm.startPrank(address(0));
-        vm.expectRevert(abi.encodeWithSelector(ILiquidatorParaswap.InvalidInitiator.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(ILiquidatorParaswapL2.InvalidInitiator.selector, address(this)));
         liquidator.executeOperation(new address[](0), new uint256[](0), new uint256[](0), address(this), abi.encode());
         vm.stopPrank();
     }
@@ -70,28 +71,26 @@ contract LiquidatorParaswapTest is LiquidatorTestHelper {
             abi.encode(false)
         );
 
-        ILiquidatorParaswap.SwapParams memory swapParams =
-            ILiquidatorParaswap.SwapParams({augustus: address(augustusAndTransferProxy), swapCallData: abi.encode()});
+        ILiquidatorParaswapL2.SwapParams memory swapParams =
+            ILiquidatorParaswapL2.SwapParams({augustus: address(augustusAndTransferProxy), swapCallData: abi.encode()});
+
+        (bytes32 arg1, bytes32 arg2) = Constants.ENCODER.encodeLiquidationCall(
+            address(Constants.WETH), address(Constants.USDBC), user, debtToCover, false
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ILiquidatorParaswap.InvalidAugustusInstance.selector, address(augustusAndTransferProxy)
+                ILiquidatorParaswapL2.InvalidAugustusInstance.selector, address(augustusAndTransferProxy)
             )
         );
 
         liquidator.liquidate(
-            ILiquidatorParaswap.LiquidationParams({
+            ILiquidatorParaswapL2.LiquidationParams({
                 collateral: Constants.WETH,
                 debt: Constants.USDBC,
                 debtToCover: debtToCover,
-                liquidationCallData: abi.encodeWithSelector(
-                    IPool.liquidationCall.selector,
-                    address(Constants.WETH),
-                    address(Constants.USDBC),
-                    user,
-                    debtToCover,
-                    false
-                )
+                liquidationArg1: arg1,
+                liquidationArg2: arg2
             }),
             IFlashLoan(address(pool)),
             swapParams
@@ -133,26 +132,23 @@ contract LiquidatorParaswapTest is LiquidatorTestHelper {
             profit + debtToCover + percentMul(debtToCover, IPool(address(pool)).FLASHLOAN_PREMIUM_TOTAL());
         augustusAndTransferProxy.setToAmount(repayAmount);
 
-        ILiquidatorParaswap.SwapParams memory swapParams = ILiquidatorParaswap.SwapParams({
+        ILiquidatorParaswapL2.SwapParams memory swapParams = ILiquidatorParaswapL2.SwapParams({
             augustus: address(augustusAndTransferProxy),
             swapCallData: abi.encodeWithSelector(
                 MockParaSwapTokenTransferProxy.mockSwap.selector, Constants.WETH, Constants.USDBC, collateralToLiquidate
-            )
+                )
         });
 
+        (bytes32 arg1, bytes32 arg2) = Constants.ENCODER.encodeLiquidationCall(
+            address(Constants.WETH), address(Constants.USDBC), user, debtToCover, false
+        );
         liquidator.liquidate(
-            ILiquidatorParaswap.LiquidationParams({
+            ILiquidatorParaswapL2.LiquidationParams({
                 collateral: Constants.WETH,
                 debt: Constants.USDBC,
                 debtToCover: debtToCover,
-                liquidationCallData: abi.encodeWithSelector(
-                    IPool.liquidationCall.selector,
-                    address(Constants.WETH),
-                    address(Constants.USDBC),
-                    user,
-                    debtToCover,
-                    false
-                )
+                liquidationArg1: arg1,
+                liquidationArg2: arg2
             }),
             IFlashLoan(address(pool)),
             swapParams

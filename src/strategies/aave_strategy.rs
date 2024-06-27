@@ -1,28 +1,26 @@
 use super::types::Config;
 use crate::collectors::time_collector::NewTick;
+use crate::graphql::{ActiveBorrowers, ActiveBorrowersVariables, BigInt};
 use anyhow::{anyhow, Result};
 use artemis_core::executors::mempool_executor::{GasBidInfo, SubmitTxToMempool};
 use artemis_core::types::Strategy;
 use async_trait::async_trait;
 use bindings_aave::{
-    i_aave_oracle::IAaveOracle,
-    i_pool_data_provider::IPoolDataProvider,
-    ierc20::IERC20,
-    l2_encoder::L2Encoder,
-    pool::{BorrowFilter, Pool, SupplyFilter},
+    i_aave_oracle::IAaveOracle, i_pool_data_provider::IPoolDataProvider, ierc20::IERC20,
+    // l2_encoder::L2Encoder, 
+    pool::Pool,
 };
 use bindings_liquidator::{
     liquidator::Liquidator,
     liquidator_paraswap::{LiquidationParams, LiquidatorParaswap, SwapParams},
 };
 use clap::{Parser, ValueEnum};
+use cynic::{GraphQlResponse, QueryBuilder};
 use ethers::{
     abi::{encode_packed, Token},
     contract::builders::ContractCall,
     providers::Middleware,
-    types::{
-        transaction::eip2718::TypedTransaction, Address, Bytes, ValueOrArray, H160, I256, U256, U64,
-    },
+    types::{transaction::eip2718::TypedTransaction, Address, Bytes, H160, I256, U256},
 };
 use ethers_contract::Multicall;
 use futures::join;
@@ -32,8 +30,6 @@ use paraswap_api::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use std::fs::File;
-use std::io::Write;
 use std::iter::zip;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -47,15 +43,13 @@ struct DeploymentConfig {
     pool_address: Address,
     pool_data_provider: Address,
     oracle_address: Address,
-    l2_encoder: Address,
-    creation_block: u64,
+    // l2_encoder: Address,
 }
 
 #[derive(Debug, Clone, Default, Parser, ValueEnum)]
 pub enum Deployment {
-    AAVE,
     #[default]
-    SEASHELL,
+    SEAMLESS,
 }
 
 #[derive(Debug, Clone, Default, Parser, ValueEnum, PartialEq)]
@@ -74,30 +68,19 @@ pub const DEFAULT_LIQUIDATION_CLOSE_FACTOR: u64 = 5000;
 
 // admin stuff
 pub const LOG_BLOCK_RANGE: u64 = 1000;
-pub const MULTICALL_CHUNK_SIZE: usize = 100;
-pub const STATE_CACHE_FILE: &str = "borrowers.json";
+pub const MULTICALL_CHUNK_SIZE: usize = 500;
 pub const PRICE_ONE: u64 = 100000000;
 pub const PERCENT_HUNDRED: u64 = 10000;
 
 fn get_deployment_config(deployment: Deployment) -> DeploymentConfig {
     match deployment {
-        Deployment::AAVE => DeploymentConfig {
-            pool_address: Address::from_str("0xA238Dd80C259a72e81d7e4664a9801593F98d1c5").unwrap(),
-            pool_data_provider: Address::from_str("0x2d8A3C5677189723C4cB8873CfC9C8976FDF38Ac")
-                .unwrap(),
-            oracle_address: Address::from_str("0x2Cc0Fc26eD4563A5ce5e8bdcfe1A2878676Ae156")
-                .unwrap(),
-            l2_encoder: Address::from_str("0x39e97c588B2907Fb67F44fea256Ae3BA064207C5").unwrap(),
-            creation_block: 2963358,
-        },
-        Deployment::SEASHELL => DeploymentConfig {
+        Deployment::SEAMLESS => DeploymentConfig {
             pool_address: Address::from_str("0x8F44Fd754285aa6A2b8B9B97739B79746e0475a7").unwrap(),
             pool_data_provider: Address::from_str("0x2A0979257105834789bC6b9E1B00446DFbA8dFBa")
                 .unwrap(),
             oracle_address: Address::from_str("0xFDd4e83890BCcd1fbF9b10d71a5cc0a738753b01")
                 .unwrap(),
-            l2_encoder: Address::from_str("0xceceF475167f7BFD8995c0cbB577644b623cD7Cf").unwrap(),
-            creation_block: 3318602,
+            // l2_encoder: Address::from_str("0xceceF475167f7BFD8995c0cbB577644b623cD7Cf").unwrap(),
         },
     }
 }
@@ -110,7 +93,6 @@ pub struct StateCache {
 
 struct PoolState {
     prices: HashMap<Address, U256>,
-    flashloan_premium_total: U256,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -147,6 +129,9 @@ pub struct AaveStrategy<M> {
     liquidator: Address,
     dex_aggregator: DexAggregator,
     paraswap_api_config: Configuration,
+    graphql_client: reqwest::Client,
+    graphql_url: String,
+    minimum_debt_to_liquidate: U256,
 }
 
 impl<M: Middleware + 'static> AaveStrategy<M> {
@@ -156,6 +141,8 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         deployment: Deployment,
         liquidator_address: String,
         dex_aggregator: DexAggregator,
+        graphql_url: String,
+        minimum_debt_to_liquidate: String,
     ) -> Self {
         Self {
             client,
@@ -168,6 +155,13 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             liquidator: Address::from_str(&liquidator_address).expect("invalid liquidator address"),
             dex_aggregator,
             paraswap_api_config: Configuration::new(),
+            graphql_client: reqwest::Client::builder()
+                .user_agent("graphql-rust/0.10.0")
+                .build()
+                .expect("Graphql reqwest client failed to initialize"),
+            graphql_url,
+            minimum_debt_to_liquidate: U256::from_dec_str(minimum_debt_to_liquidate.as_str())
+                .expect("Unable to parse minimum_debt_to_liquidate"),
         }
     }
 }
@@ -192,9 +186,6 @@ impl<M: Middleware + 'static> Strategy<Event, Action> for AaveStrategy<M> {
         if self.dex_aggregator == DexAggregator::None {
             self.approve_tokens().await?;
         }
-
-        self.load_cache()?;
-        self.update_state().await?;
 
         info!("done syncing state");
         Ok(())
@@ -285,13 +276,17 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             }
 
             let result: Vec<(U256, U256, U256, U256, U256, U256)> = multicall.call_array().await?;
-            for (borrower, (_, _, _, _, _, health_factor)) in zip(chunk, result) {
+            for (borrower, (_, total_debt_base, _, _, _, health_factor)) in zip(chunk, result) {
                 if health_factor.lt(&U256::from_dec_str("1000000000000000000").unwrap()) {
                     info!(
                         "Found underwater borrower {:?} -  healthFactor: {}",
                         borrower, health_factor
                     );
-                    underwater_borrowers.push((borrower.address, health_factor));
+
+                    // Don't try and liquidate very small debts with Paraswap
+                    if total_debt_base > self.minimum_debt_to_liquidate {
+                        underwater_borrowers.push((borrower.address, health_factor));
+                    }
                 }
             }
         }
@@ -301,145 +296,83 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         Ok(underwater_borrowers)
     }
 
-    // load borrower state cache from file if exists
-    fn load_cache(&mut self) -> Result<()> {
-        match File::open(STATE_CACHE_FILE) {
-            Ok(file) => {
-                let cache: StateCache = serde_json::from_reader(file)?;
-                info!("read state cache from file");
-                self.last_block_number = cache.last_block_number;
-                self.borrowers = cache.borrowers;
-            }
-            Err(_) => {
-                info!("no state cache file found, creating new one");
-                self.last_block_number = self.config.creation_block;
-            }
-        };
-
-        Ok(())
-    }
-
-    // update known borrower state from last block to latest block
     async fn update_state(&mut self) -> Result<()> {
-        let latest_block = self.client.get_block_number().await?;
-        info!(
-            "Updating state from block {} to {}",
-            self.last_block_number, latest_block
-        );
+        self.borrowers = HashMap::new();
 
-        self.get_borrow_logs(self.last_block_number.into(), latest_block)
-            .await?
-            .into_iter()
-            .for_each(|log| {
-                let user = log.on_behalf_of;
-                // fetch assets if user already a borrower
-                if self.borrowers.contains_key(&user) {
-                    let borrower = self.borrowers.get_mut(&user).unwrap();
-                    borrower.debt.insert(log.reserve);
-                    return;
-                } else {
-                    self.borrowers.insert(
-                        user,
-                        Borrower {
-                            address: user,
-                            collateral: HashSet::new(),
-                            debt: HashSet::from([log.reserve]),
-                        },
-                    );
-                }
+        let mut last: String = "".to_string();
+        loop {
+            let query = ActiveBorrowers::build(ActiveBorrowersVariables {
+                first: 1000,
+                last: last.as_str(),
+                zero: BigInt("0".to_string()),
             });
 
-        info!(
-            "Got borrow logs from {} to {}",
-            self.last_block_number, latest_block
-        );
+            let response_body = self
+                .graphql_client
+                .post(self.graphql_url.clone())
+                .json(&query)
+                .send()
+                .await?;
 
-        self.get_supply_logs(self.last_block_number.into(), latest_block)
-            .await?
-            .into_iter()
-            .for_each(|log| {
-                let user = log.on_behalf_of;
-                // fetch assets if user already a supplier
-                if self.borrowers.contains_key(&user) {
-                    let borrower = self.borrowers.get_mut(&user).unwrap();
-                    borrower.collateral.insert(log.reserve);
-                    return;
-                } else {
-                    self.borrowers.insert(
-                        user,
-                        Borrower {
-                            address: user,
-                            collateral: HashSet::from([log.reserve]),
-                            debt: HashSet::new(),
-                        },
-                    );
+            let response_status = response_body.status();
+
+            //info!("{:?}", response_body);
+            let response_json: GraphQlResponse<ActiveBorrowers> = response_body.json().await?;
+
+            if response_status.is_client_error() || response_status.is_server_error() {
+                return Err(anyhow!(
+                    "Error fetching ActiveBorrowers from subgraph. status: {}, content: {:?}",
+                    response_status,
+                    response_json
+                ));
+            }
+            info!("{:?}", response_json);
+
+            let data = response_json
+                .data
+                .ok_or(anyhow!("Missing data ActiveBorrowers graphql response"))?;
+
+            let users_length = data.users.len();
+            last = data.users[users_length - 1].id.inner().to_string();
+
+            info!("length: {:?}, last: {:?}", users_length, last);
+
+            for borrower in data.users {
+                let address_str = H160::from_str(borrower.id.inner()).unwrap();
+                let mut collateral = HashSet::new();
+                let mut debt = HashSet::new();
+
+                for reserve in borrower.reserves {
+                    let a_token_balance =
+                        U256::from_dec_str(no_negative(reserve.current_atoken_balance.0).as_str())?;
+                    let debt_token_balance =
+                        U256::from_dec_str(no_negative(reserve.current_total_debt.0).as_str())?;
+
+                    if a_token_balance > U256::zero() {
+                        collateral
+                            .insert(H160::from_str(reserve.reserve.underlying_asset.0.as_str())?);
+                    }
+                    if debt_token_balance > U256::zero() {
+                        debt.insert(H160::from_str(reserve.reserve.underlying_asset.0.as_str())?);
+                    }
                 }
-            });
 
-        info!(
-            "Got supply logs from {} to {}",
-            self.last_block_number, latest_block
-        );
+                self.borrowers.insert(
+                    address_str,
+                    Borrower {
+                        address: address_str,
+                        collateral,
+                        debt,
+                    },
+                );
+            }
 
-        // write state cache to file
-        info!("Write state cache to file {}", STATE_CACHE_FILE);
-        let cache = StateCache {
-            last_block_number: latest_block.as_u64(),
-            borrowers: self.borrowers.clone(),
-        };
-        self.last_block_number = latest_block.as_u64();
-        let mut file = File::create(STATE_CACHE_FILE)?;
-        file.write_all(serde_json::to_string(&cache)?.as_bytes())?;
+            if users_length < 1000 {
+                break;
+            }
+        }
 
         Ok(())
-    }
-
-    // fetch all borrow events from the from_block to to_block
-    async fn get_borrow_logs(&self, from_block: U64, to_block: U64) -> Result<Vec<BorrowFilter>> {
-        let pool = Pool::<M>::new(self.config.pool_address, self.client.clone());
-
-        let mut res = Vec::new();
-        for start_block in
-            (from_block.as_u64()..to_block.as_u64()).step_by(LOG_BLOCK_RANGE as usize)
-        {
-            let end_block = std::cmp::min(start_block + LOG_BLOCK_RANGE - 1, to_block.as_u64());
-            pool.borrow_filter()
-                .from_block(start_block)
-                .to_block(end_block)
-                .address(ValueOrArray::Value(self.config.pool_address))
-                .query()
-                .await?
-                .into_iter()
-                .for_each(|log| {
-                    res.push(log);
-                });
-        }
-
-        Ok(res)
-    }
-
-    // fetch all borrow events from the from_block to to_block
-    async fn get_supply_logs(&self, from_block: U64, to_block: U64) -> Result<Vec<SupplyFilter>> {
-        let pool = Pool::<M>::new(self.config.pool_address, self.client.clone());
-
-        let mut res = Vec::new();
-        for start_block in
-            (from_block.as_u64()..to_block.as_u64()).step_by(LOG_BLOCK_RANGE as usize)
-        {
-            let end_block = std::cmp::min(start_block + LOG_BLOCK_RANGE - 1, to_block.as_u64());
-            pool.supply_filter()
-                .from_block(start_block)
-                .to_block(end_block)
-                .address(ValueOrArray::Value(self.config.pool_address))
-                .query()
-                .await?
-                .into_iter()
-                .for_each(|log| {
-                    res.push(log);
-                });
-        }
-
-        Ok(res)
     }
 
     async fn approve_tokens(&mut self) -> Result<()> {
@@ -618,7 +551,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         amount: U256,
         is_buy: bool,
     ) -> Result<(Bytes, Address)> {
-        thread::sleep(time::Duration::from_millis(1000));   // Sleep to get around rate limits
+        thread::sleep(time::Duration::from_millis(1000)); // Sleep to get around rate limits
 
         let collateral_config = self
             .tokens
@@ -660,17 +593,9 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
         let prices = prices_api::prices_get(&self.paraswap_api_config, prices_params).await?;
 
-        let dest_amount = if is_buy {
-            Some(amount.clone())
-        } else {
-            None
-        };
+        let dest_amount = if is_buy { Some(amount.clone()) } else { None };
 
-        let src_amount = if is_buy {
-            None
-        } else {
-            Some(amount.clone())
-        };
+        let src_amount = if is_buy { None } else { Some(amount.clone()) };
 
         let transaction_params = transactions_api::TransactionsNetworkPostParams {
             transactions_request_payload: TransactionsRequestPayload {
@@ -726,12 +651,6 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
 
         let price_oracle = IAaveOracle::<M>::new(self.config.oracle_address, self.client.clone());
 
-        let mut flashloan_premium_total = U256::from(0);
-        if self.dex_aggregator == DexAggregator::Paraswap {
-            let pool = Pool::<M>::new(self.config.pool_address, self.client.clone());
-            flashloan_premium_total = U256::from(pool.flashloan_premium_total().await?);
-        }
-
         for token_address in self.tokens.keys() {
             multicall.add_call(price_oracle.get_asset_price(*token_address), false);
         }
@@ -742,10 +661,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         }
         multicall.clear_calls();
 
-        Ok(PoolState {
-            prices,
-            flashloan_premium_total,
-        })
+        Ok(PoolState { prices })
     }
 
     async fn get_liquidation_opportunity(
@@ -873,11 +789,17 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             op.borrower, op.collateral, op.debt, op.debt_to_cover, op.collateral_to_liquidate, op.profit_eth
         );
 
-        let encoder = L2Encoder::new(self.config.l2_encoder, self.client.clone());
-        let (data0, data1) = encoder
-            .encode_liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
-            .call()
-            .await?;
+        // For L2 Pool encoding
+        // let encoder = L2Encoder::new(self.config.l2_encoder, self.client.clone());
+        // let (data0, data1) = encoder
+        //     .encode_liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
+        //     .call()
+        //     .await?;
+        let pool = Pool::<M>::new(self.config.pool_address, self.client.clone());
+        let liquidation_call_data = pool
+            .liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
+            .calldata()
+            .ok_or(anyhow!("Invalid liquidation call data"))?;
 
         let liquidator_paraswap = LiquidatorParaswap::new(self.liquidator, self.client.clone());
         let (paraswap_call_data, paraswap_augustus) = self
@@ -889,8 +811,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                 collateral: op.collateral,
                 debt: op.debt,
                 debt_to_cover: op.debt_to_cover,
-                liquidation_arg_1: data0,
-                liquidation_arg_2: data1,
+                liquidation_call_data,
             },
             self.config.pool_address,
             SwapParams {
@@ -913,11 +834,18 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             op.borrower, op.collateral, op.debt, op.debt_to_cover, op.collateral_to_liquidate, op.profit_eth
         );
 
-        let encoder = L2Encoder::new(self.config.l2_encoder, self.client.clone());
-        let (data0, data1) = encoder
-            .encode_liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
-            .call()
-            .await?;
+        // For L2 Pool encoding
+        // let encoder = L2Encoder::new(self.config.l2_encoder, self.client.clone());
+        // let (data0, data1) = encoder
+        //     .encode_liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
+        //     .call()
+        //     .await?;
+
+        let pool = Pool::<M>::new(self.config.pool_address, self.client.clone());
+        let liquidation_call_data = pool
+            .liquidation_call(op.collateral, op.debt, op.borrower, op.debt_to_cover, false)
+            .calldata()
+            .ok_or(anyhow!("Invalid liquidation call data"))?;
 
         let liquidator = Liquidator::new(self.liquidator, self.client.clone());
 
@@ -926,8 +854,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         let contract_call = liquidator.liquidate(
             op.collateral,
             op.debt_to_cover,
-            data0,
-            data1,
+            liquidation_call_data,
             Bytes::from(swap_path),
         );
 
@@ -954,4 +881,11 @@ fn percent_mul(a: U256, bps: U256) -> U256 {
 fn percent_div(a: U256, bps: U256) -> U256 {
     let half_bps = bps / U256::from(2);
     (half_bps + (a * U256::from(PERCENT_HUNDRED))) / bps
+}
+
+fn no_negative(a: String) -> String {
+    match a.starts_with("-") {
+        true => "0".to_string(),
+        false => a,
+    }
 }

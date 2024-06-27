@@ -4,11 +4,11 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {MockOracle} from "../util/MockOracle.sol";
-import {IPool} from "../../src/interfaces/IPool.sol";
+import {IL2Pool} from "../../src/interfaces/IL2Pool.sol";
 import {ConfiguratorInputTypes} from "../../src/interfaces/ConfiguratorInputTypes.sol";
 import {Constants} from "./Constants.sol";
 
-abstract contract LiquidatorTestHelper is Test {
+abstract contract LiquidatorTestHelperL2 is Test {
     struct SetupLiquidationPositionParams {
         IERC20Metadata collateral;
         IERC20Metadata debt;
@@ -21,7 +21,7 @@ abstract contract LiquidatorTestHelper is Test {
 
     MockOracle oracle;
     address user;
-    IPool pool;
+    IL2Pool pool;
 
     function forkBlockNumber() internal pure virtual returns (uint256) {
         return 4878098;
@@ -91,8 +91,8 @@ abstract contract LiquidatorTestHelper is Test {
     {
         vm.startPrank(user);
         params.collateral.approve(address(pool), type(uint256).max);
-        pool.supply(address(params.collateral), params.collateralAmount, user, 0);
-        pool.borrow(address(params.debt), params.debtAmount, 2, 0, user);
+        pool.supply(Constants.ENCODER.encodeSupplyParams(address(params.collateral), params.collateralAmount, 0));
+        pool.borrow(Constants.ENCODER.encodeBorrowParams(address(params.debt), params.debtAmount, 2, 0));
         vm.stopPrank();
         uint256 debtAssetPrice = oracle.getAssetPrice(address(params.debt));
         oracle.setAssetPrice(address(params.collateral), params.collateralAssetPrice);

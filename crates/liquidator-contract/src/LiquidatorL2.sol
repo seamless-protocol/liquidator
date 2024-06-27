@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Owned} from "solmate/auth/Owned.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {IPool} from "./interfaces/IPool.sol";
+import {IL2Pool} from "./interfaces/IL2Pool.sol";
 import {IUniswapV3SwapCallback} from "./interfaces/IUniswapV3SwapCallback.sol";
 import {IUniswapV3PoolActions} from "./interfaces/IUniswapV3PoolActions.sol";
 import {PoolAddress} from "./lib/PoolAddress.sol";
@@ -13,33 +13,36 @@ uint160 constant MIN_SQRT_RATIO = 4295128739;
 /// @dev The maximum value that can be returned from #getSqrtRatioAtTick. Equivalent to getSqrtRatioAtTick(MAX_TICK)
 uint160 constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342;
 
-contract Liquidator is Owned(msg.sender), IUniswapV3SwapCallback {
+contract LiquidatorL2 is Owned(msg.sender), IUniswapV3SwapCallback {
     struct SwapCallbackData {
         bytes path;
-        bytes liquidationCallData;
+        bytes32 liquidationArg1;
+        bytes32 liquidationArg2;
     }
 
     address private constant uniswapV3Factory = 0x33128a8fC17869897dcE68Ed026d694621f6FDfD;
-    IPool public constant pool = IPool(0x8F44Fd754285aa6A2b8B9B97739B79746e0475a7);
+    IL2Pool public constant pool = IL2Pool(0x8F44Fd754285aa6A2b8B9B97739B79746e0475a7);
 
     constructor() {}
 
     /// @notice Performs a liquidation using a Uniswap v3 flash swap
     /// @param collateral address of the collateral asset to be liquidated
     /// @param debtToCover amount of debt asset to repay in exchange for collateral
-    /// @param liquidationCallData encoded argument for Aave Pool liquidation call
+    /// @param liquidationArg1 encoded argument for Aave L2 Pool liquidation call, see: IL2Pool and IL2Encoder
+    /// @param liquidationArg2 encoded argument for Aave L2 Pool liquidation call, see: IL2Pool and IL2Encoder
     /// @param swapPath encoded path of pools to swap collateral through, see: https://docs.uniswap.org/contracts/v3/guides/swaps/multihop-swaps
     function liquidate(
         address collateral,
         uint256 debtToCover,
-        bytes calldata liquidationCallData,
+        bytes32 liquidationArg1,
+        bytes32 liquidationArg2,
         bytes calldata swapPath
     ) external onlyOwner returns (int256 collateralGain) {
         uint256 collateralBalance = ERC20(collateral).balanceOf(address(this));
 
         swapOutUniswap(
             debtToCover,
-            SwapCallbackData({path: swapPath, liquidationCallData: liquidationCallData})
+            SwapCallbackData({path: swapPath, liquidationArg1: liquidationArg1, liquidationArg2: liquidationArg2})
         );
 
         collateralGain = int256(ERC20(collateral).balanceOf(address(this))) - int256(collateralBalance);
@@ -52,11 +55,11 @@ contract Liquidator is Owned(msg.sender), IUniswapV3SwapCallback {
         (address tokenIn, address tokenOut, uint24 fee) = Path.decodeFirstPool(data.path);
         verifyCallback(uniswapV3Factory, PoolAddress.getPoolKey(tokenIn, tokenOut, fee));
 
-        if (data.liquidationCallData.length > 0) {
-            (bool success,) = address(pool).call(data.liquidationCallData);
-            require(success, "liquidationCall failed");
+        if (data.liquidationArg1 != "" && data.liquidationArg2 != "") {
+            pool.liquidationCall(data.liquidationArg1, data.liquidationArg2);
 
-            delete data.liquidationCallData;
+            delete data.liquidationArg1;
+            delete data.liquidationArg2;
         }
 
         uint256 amountToPay = amount0Delta > 0 ? uint256(amount0Delta) : uint256(amount1Delta);

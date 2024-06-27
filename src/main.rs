@@ -22,6 +22,7 @@ use tracing_subscriber::{filter, prelude::*};
 pub mod collectors;
 pub mod executors;
 pub mod strategies;
+pub mod graphql;
 
 static POLL_INTERVAL_SECS: u64 = 60 * 5;
 pub const CHAIN_ID: u64 = 8453;
@@ -49,6 +50,12 @@ pub struct Args {
 
     #[arg(long)]
     pub dex_aggregator: DexAggregator,
+
+    #[arg(long)]
+    pub graphql_url: String,
+
+    #[arg(long)]
+    pub minimum_debt_to_liquidate: String,
 }
 
 #[tokio::main]
@@ -99,6 +106,8 @@ async fn main() -> Result<()> {
         args.deployment,
         args.liquidator_address,
         args.dex_aggregator,
+        args.graphql_url,
+        args.minimum_debt_to_liquidate,
     );
     engine.add_strategy(Box::new(strategy));
 

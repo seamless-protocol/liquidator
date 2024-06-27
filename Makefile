@@ -4,8 +4,8 @@
 
 .PHONY: RUN
 
-run-debug-paraswap		:; ./target/debug/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seashell --liquidator-address ${LIQUIDATOR_ADDRESS} --dex-aggregator paraswap
-run-release-paraswap	:; ./target/release/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seashell --liquidator-address ${LIQUIDATOR_ADDRESS} --dex-aggregator paraswap
+run-debug-paraswap		:; ./target/debug/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seamless --liquidator-address ${LIQUIDATOR_ADDRESS} --graphql-url ${GRAPHQL_URL} --dex-aggregator paraswap --minimum-debt-to-liquidate 500000000
+run-release-paraswap	:; ./target/release/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seamless --liquidator-address ${LIQUIDATOR_ADDRESS} --graphql-url ${GRAPHQL_URL} --dex-aggregator paraswap --minimum-debt-to-liquidate 500000000
 
-run-debug		:; ./target/debug/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seashell --liquidator-address ${LIQUIDATOR_ADDRESS}
-run-release	:; ./target/release/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seashell --liquidator-address ${LIQUIDATOR_ADDRESS}
+run-debug		:; ./target/debug/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seamless --liquidator-address ${LIQUIDATOR_ADDRESS} --graphql-url ${GRAPHQL_URL} --dex-aggregator none --minimum-debt-to-liquidate 400000000
+run-release	:; ./target/release/seamless-liquidator --rpc ${RPC_URL} --private-key ${PRIVATE_KEY} --bid-percentage 100 --deployment seamless --liquidator-address ${LIQUIDATOR_ADDRESS} --graphql-url ${GRAPHQL_URL} --dex-aggregator none --minimum-debt-to-liquidate 0

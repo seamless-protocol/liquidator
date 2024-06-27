@@ -5374,11 +5374,6 @@ pub mod i_pool {
         ::ethers::contract::EthAbiCodec,
         serde::Serialize,
         serde::Deserialize,
-        Default,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash
     )]
     pub struct GetReserveDataReturn(pub ReserveData);
     ///Container type for all return fields from the `getReserveNormalizedIncome` function with signature `getReserveNormalizedIncome(address)` and selector `0xd15e0053`

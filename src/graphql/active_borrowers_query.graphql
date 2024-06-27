@@ -1,0 +1,58 @@
+query ActiveBorrowers($first: Int!, $last: String!, $zero: BigInt!) {
+  users(
+    first: $first
+    where: {
+      and: [
+        {
+          id_gt: $last,
+        },
+        {
+          reserves_: {
+            currentATokenBalance_gt: $zero,
+            usageAsCollateralEnabledOnUser: true,
+          }
+        },
+        {
+          reserves_: {
+            currentTotalDebt_gt: $zero
+          }
+        }
+      ]
+    }
+  ) {
+    id
+    eModeCategoryId {
+      id
+    }
+    reserves {
+      id
+      reserve {
+        id
+        decimals
+        underlyingAsset
+        symbol
+        name
+        aToken {
+          id
+        }
+        baseLTVasCollateral
+        price {
+          priceInEth
+        }
+        reserveLiquidationThreshold
+        eMode {
+          liquidationThreshold
+        }
+        usageAsCollateralEnabled
+      }
+      currentTotalDebt
+      currentATokenBalance
+      scaledATokenBalance
+      usageAsCollateralEnabledOnUser
+      stableBorrowRate
+      scaledVariableDebt
+      principalStableDebt
+      stableBorrowLastUpdateTimestamp
+    }
+  }
+}

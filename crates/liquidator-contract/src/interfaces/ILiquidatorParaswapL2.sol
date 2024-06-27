@@ -4,17 +4,17 @@ pragma solidity ^0.8.20;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IFlashLoan} from "./IFlashLoan.sol";
 
-interface ILiquidatorParaswap {
+interface ILiquidatorParaswapL2 {
     error SenderNotPool(address);
     error InvalidInitiator(address);
     error InvalidAugustusInstance(address);
-    error FailedLiquidationCall();
     error InvalidDebtBalance(uint256);
 
     struct FlashLoanCallbackData {
         uint256 debtBalanceBefore;
         IERC20 collateral;
-        bytes liquidationCallData;
+        bytes32 liquidationArg1;
+        bytes32 liquidationArg2;
         SwapParams swapParams;
     }
 
@@ -25,8 +25,10 @@ interface ILiquidatorParaswap {
         IERC20 debt;
         // Amount of debt to repay
         uint256 debtToCover;
-        // Encoded argument for Aave Pool liquidation call
-        bytes liquidationCallData;
+        // Encoded argument for Aave L2 Pool liquidation call, see: IL2Pool and IL2Encoder
+        bytes32 liquidationArg1;
+        // Encoded argument for Aave L2 Pool liquidation call, see: IL2Pool and IL2Encoder
+        bytes32 liquidationArg2;
     }
 
     struct SwapParams {
