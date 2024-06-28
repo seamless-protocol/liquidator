@@ -6,8 +6,10 @@ use artemis_core::executors::mempool_executor::{GasBidInfo, SubmitTxToMempool};
 use artemis_core::types::Strategy;
 use async_trait::async_trait;
 use bindings_aave::{
-    i_aave_oracle::IAaveOracle, i_pool_data_provider::IPoolDataProvider, ierc20::IERC20,
-    // l2_encoder::L2Encoder, 
+    i_aave_oracle::IAaveOracle,
+    i_pool_data_provider::IPoolDataProvider,
+    ierc20::IERC20,
+    // l2_encoder::L2Encoder,
     pool::Pool,
 };
 use bindings_liquidator::{
@@ -326,7 +328,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                     response_json
                 ));
             }
-            info!("{:?}", response_json);
+            // info!("{:?}", response_json);
 
             let data = response_json
                 .data
@@ -335,7 +337,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
             let users_length = data.users.len();
             last = data.users[users_length - 1].id.inner().to_string();
 
-            info!("length: {:?}, last: {:?}", users_length, last);
+            info!("batch length: {:?}, last: {:?}", users_length, last);
 
             for borrower in data.users {
                 let address_str = H160::from_str(borrower.id.inner()).unwrap();
@@ -394,16 +396,22 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                 .call()
                 .await?;
             if allowance == U256::zero() {
-                // TODO remove unwrap once we figure out whats broken
-                liquidator
-                    .approve_pool(*token_address)
-                    .nonce(nonce)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        error!("approve failed: {:?}", e);
-                        e
-                    })?;
+                info!(
+                    "apporve_tokens - token_address: {}, nonce: {}, allowance: {}",
+                    *token_address, nonce, allowance
+                );
+
+                let approve_contract_call = liquidator.approve_pool(*token_address).nonce(nonce);
+
+                debug!(
+                    "approve_tokens - approve_contract_call: {:?}",
+                    approve_contract_call
+                );
+
+                approve_contract_call.send().await.map_err(|e| {
+                    error!("approve failed: {:?}", e);
+                    e
+                })?;
                 nonce = nonce + 1;
             }
         }
