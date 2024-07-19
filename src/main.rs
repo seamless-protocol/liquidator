@@ -24,7 +24,7 @@ pub mod executors;
 pub mod strategies;
 pub mod graphql;
 
-static POLL_INTERVAL_SECS: u64 = 60 * 5;
+static POLL_INTERVAL_SECS: u64 = 60 * 10;
 pub const CHAIN_ID: u64 = 8453;
 
 /// CLI Options.

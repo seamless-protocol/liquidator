@@ -559,7 +559,7 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
         amount: U256,
         is_buy: bool,
     ) -> Result<(Bytes, Address)> {
-        thread::sleep(time::Duration::from_millis(1000)); // Sleep to get around rate limits
+        thread::sleep(time::Duration::from_millis(2000)); // Sleep to get around rate limits
 
         let collateral_config = self
             .tokens
