@@ -328,7 +328,11 @@ impl<M: Middleware + 'static> AaveStrategy<M> {
                     response_json
                 ));
             }
-            // info!("{:?}", response_json);
+            //info!("{:?}", response_json);
+
+            if response_json.data.is_none() {
+                break;
+            }
 
             let data = response_json
                 .data
